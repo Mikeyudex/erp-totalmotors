@@ -20,4 +20,5 @@ export async function getToken(username: string, password: string): Promise<stri
         console.error("Error al iniciar sesión:", error)
         throw error
     }
+    
 }
