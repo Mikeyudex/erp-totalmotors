@@ -4,7 +4,7 @@ import type React from "react"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Box, Home, Package, Settings, Truck, Users } from "lucide-react"
+import { Box, Home, Package, Settings, Truck, Users, Tag } from "lucide-react"
 
 import {
   Sidebar,
@@ -48,6 +48,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <Link href="/productos">
                   <Package className="h-4 w-4" />
                   <span>Productos</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname.startsWith("/categorias")} tooltip="Categorías">
+                <Link href="/categorias">
+                  <Tag className="h-4 w-4" />
+                  <span>Categorías</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
