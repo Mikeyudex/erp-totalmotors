@@ -29,8 +29,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <Sidebar collapsible="icon">
         <SidebarHeader className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 px-2">
-            <Box className="h-6 w-6 flex-shrink-0" />
-            <span className="text-lg font-bold group-data-[collapsible=icon]:hidden">ERP System</span>
+            {/* <Box className="h-6 w-6 flex-shrink-0" /> */}
+            <img src="/Logo-DOF1-768x552.png" alt="logo" className="h-6 w-8 group-data-[collapsible=icon]:hidden" />
+            <span className="text-lg font-bold group-data-[collapsible=icon]:hidden">ERP TotalMotors</span>
           </Link>
         </SidebarHeader>
         <SidebarContent>

@@ -1,30 +1,22 @@
 import type { PaginatedResponse, PaginationParams, Category } from "@/lib/types"
+import { getToken } from "./auth-service"
 
 // URL base de la API (en producción, esto vendría de variables de entorno)
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.example.com"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.example.com";
+const username = process.env.NEXT_PUBLIC_USERNAME || "admin@example.com";
+const password = process.env.NEXT_PUBLIC_PASSWORD || "";
+
 
 // Datos de ejemplo para simular respuestas de la API
 const mockCategories: Category[] = [
-  { id: "1", name: "Motor", slug: "motor" },
-  { id: "2", name: "Transmisión", slug: "transmision" },
-  { id: "3", name: "Suspensión", slug: "suspension" },
-  { id: "4", name: "Frenos", slug: "frenos" },
-  { id: "5", name: "Carrocería", slug: "carroceria" },
-  { id: "6", name: "Eléctrico", slug: "electrico" },
-  { id: "7", name: "Refrigeración", slug: "refrigeracion" },
-  { id: "8", name: "Combustible", slug: "combustible" },
-  { id: "9", name: "Escape", slug: "escape" },
-  { id: "10", name: "Interior", slug: "interior" },
-  { id: "11", name: "Exterior", slug: "exterior" },
-  { id: "12", name: "Iluminación", slug: "iluminacion" },
-  { id: "13", name: "Audio", slug: "audio" },
-  { id: "14", name: "Climatización", slug: "climatizacion" },
-  { id: "15", name: "Seguridad", slug: "seguridad" },
-  { id: "16", name: "Herramientas", slug: "herramientas" },
-  { id: "17", name: "Aceites y Fluidos", slug: "aceites-fluidos" },
-  { id: "18", name: "Filtros", slug: "filtros" },
-  { id: "19", name: "Neumáticos", slug: "neumaticos" },
-  { id: "20", name: "Llantas", slug: "llantas" },
+  { id: 1, name: "Motor", slug: "motor", parent: 0 },
+  { id: 2, name: "Transmisión", slug: "transmision", parent: 0 },
+  { id: 3, name: "Suspensión", slug: "suspension", parent: 0 },
+  { id: 4, name: "Frenos", slug: "frenos", parent: 0 },
+  { id: 5, name: "Carrocería", slug: "carroceria", parent: 0 },
+  { id: 6, name: "Eléctrico", slug: "electrico", parent: 0 },
+  { id: 7, name: "Refrigeración", slug: "refrigeracion", parent: 0 },
+  { id: 8, name: "Combustible", slug: "combustible", parent: 0 },
 ]
 
 /**
@@ -86,10 +78,32 @@ export async function getCategoriesPaginated(params: PaginationParams): Promise<
   }
 }
 
+export async function getFlatCategories(): Promise<{ label: string; value: string }[]> {
+  let token = await getToken(username, password);
+  const res = await fetch(`${API_URL}/api/categories/flat`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  })
+  if (!res.ok) throw new Error("Error al obtener categorías")
+  return res.json()
+}
+
+export async function getTreeCategories(): Promise<Category[]> {
+  let token = await getToken(username, password);
+  const res = await fetch(`${API_URL}/api/categories/tree`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  })
+  if (!res.ok) throw new Error("Error al obtener categorías")
+  return res.json()
+}
+
 /**
  * Obtiene una categoría por su ID
  */
-export async function getCategoryById(id: string): Promise<Category> {
+/* export async function getCategoryById(id: string): Promise<Category> {
   try {
     // En un entorno real, haríamos una solicitud fetch a la API
     // const response = await fetch(`${API_URL}/categories/${id}`);
@@ -109,12 +123,12 @@ export async function getCategoryById(id: string): Promise<Category> {
     console.error(`Error al obtener la categoría con ID ${id}:`, error)
     throw error
   }
-}
+} */
 
 /**
  * Crea una nueva categoría
  */
-export async function createCategory(category: Omit<Category, "id">): Promise<Category> {
+/* export async function createCategory(category: Omit<Category, "id">): Promise<Category> {
   try {
     // En un entorno real, haríamos una solicitud POST a la API
     // const response = await fetch(`${API_URL}/categories`, {
@@ -140,12 +154,12 @@ export async function createCategory(category: Omit<Category, "id">): Promise<Ca
     console.error("Error al crear la categoría:", error)
     throw error
   }
-}
+} */
 
 /**
  * Actualiza una categoría existente
  */
-export async function updateCategory(id: string, category: Partial<Category>): Promise<Category> {
+/* export async function updateCategory(id: string, category: Partial<Category>): Promise<Category> {
   try {
     // En un entorno real, haríamos una solicitud PUT a la API
     // const response = await fetch(`${API_URL}/categories/${id}`, {
@@ -177,11 +191,11 @@ export async function updateCategory(id: string, category: Partial<Category>): P
     throw error
   }
 }
-
+ */
 /**
  * Elimina una categoría
  */
-export async function deleteCategory(id: string): Promise<void> {
+/* export async function deleteCategory(id: string): Promise<void> {
   try {
     // En un entorno real, haríamos una solicitud DELETE a la API
     // const response = await fetch(`${API_URL}/categories/${id}`, {
@@ -204,3 +218,4 @@ export async function deleteCategory(id: string): Promise<void> {
     throw error
   }
 }
+ */

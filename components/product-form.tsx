@@ -12,12 +12,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ComboboxForm } from "@/components/combobox-form"
-import { MultiSelectCategories } from "@/components/multi-select-categories"
 import { ImageUpload } from "@/components/image-upload"
 import { useToast } from "@/hooks/use-toast"
 
-import { getCategories, createProduct } from "@/services/product-service"
-import type { Category } from "@/lib/types"
+import { createProduct } from "@/services/product-service";
+import { CategoryTreeSelector } from "@/components/category-tree-selector"
+import type { Category, CreateProductWoocommerce } from "@/lib/types";
+import { getTreeCategories } from "@/services/category-service"
+import { createSlug, createTag, homologateCategory, homologateImages } from "@/lib/utils"
 
 // Datos de ejemplo para los selects
 const vehiculos = [
@@ -58,7 +60,7 @@ export function ProductForm() {
   useEffect(() => {
     async function loadCategories() {
       try {
-        const categories = await getCategories()
+        const categories = await getTreeCategories()
         setAvailableCategories(categories)
       } catch (error) {
         toast({
@@ -78,8 +80,8 @@ export function ProductForm() {
   const generatedSku =
     vehiculo && selectedCategories.length > 0
       ? `${vehiculo.substring(0, 3)}-${selectedCategories[0].slug.substring(0, 3)}-${Date.now()
-          .toString()
-          .substring(9, 13)}`
+        .toString()
+        .substring(9, 13)}`
       : ""
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -89,20 +91,20 @@ export function ProductForm() {
     try {
       const formData = new FormData(e.currentTarget)
 
-      const productData = {
+      const productData: CreateProductWoocommerce = {
         sku: generatedSku,
-        nombre: formData.get("nombre") as string,
-        categorias: selectedCategories,
-        modelo: categoriaModelo,
-        precio: Number.parseFloat(formData.get("precio") as string),
-        stock: Number.parseInt(formData.get("stock") as string),
-        ubicacion: formData.get("ubicacion") as string,
-        numeroParte: formData.get("numeroParte") as string,
-        imagenes: images,
+        name: formData.get("nombre") as string,
+        slug: createSlug(formData.get("nombre") as string),
+        short_description: formData.get("numeroParte") as string,
+        categories: homologateCategory(selectedCategories),
+        price: formData.get("precio") as string,
+        stock_quantity: Number.parseInt(formData.get("stock") as string),
+        tags: [createTag(formData.get("ubicacion") as string)], //tag
+        images: homologateImages(images),
       }
 
       // Validaciones básicas
-      if (!productData.nombre || !vehiculo || selectedCategories.length === 0) {
+      if (!productData.name || !vehiculo || selectedCategories.length === 0) {
         toast({
           title: "Error de validación",
           description: "Por favor complete todos los campos obligatorios",
@@ -188,12 +190,10 @@ export function ProductForm() {
                         <span className="ml-2 text-sm text-muted-foreground">Cargando categorías...</span>
                       </div>
                     ) : (
-                      <MultiSelectCategories
-                        id="categorias"
+                      <CategoryTreeSelector
                         categories={availableCategories}
                         selectedCategories={selectedCategories}
                         onSelectionChange={setSelectedCategories}
-                        placeholder="Seleccione las categorías"
                       />
                     )}
                   </div>

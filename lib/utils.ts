@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { Category, CategoryWoo, Tags, WooImages } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -15,4 +16,51 @@ export const numberFormatPrice = (value = 0) => {
   let operator = USDollar.format(value).split(".")[0]
 
   return operator;
+};
+
+export const createTag = (name: string): Tags => {
+  return {
+    id: Date.now(),
+    name: name,
+    slug: createSlug(name),
+  };
+};
+
+export const createSlug = (name: string) => {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remover acentos
+    .replace(/[^a-z0-9\s-]/g, "") // Remover caracteres especiales
+    .replace(/\s+/g, "-") // Reemplazar espacios con guiones
+    .replace(/-+/g, "-") // Remover guiones duplicados
+    .trim();
+};
+
+export const homologateCategory = (categories: Category[]): CategoryWoo[] => {
+
+  let homologatedCategories: CategoryWoo[] = [];
+
+  categories.forEach((category) => {
+    let homologatedCategory: CategoryWoo = {
+      id: category.id,
+    };
+    homologatedCategories.push(homologatedCategory);
+  });
+
+  return homologatedCategories;
+};
+
+export const homologateImages = (images: string[]): WooImages[] => {
+  let homologatedImages: WooImages[] = [];
+
+  images.forEach((image) => {
+    let homologatedImage: WooImages = {
+      id: Date.now(),
+      src: image,
+    };
+    homologatedImages.push(homologatedImage);
+  });
+
+  return homologatedImages;
 };
