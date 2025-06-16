@@ -60,22 +60,22 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <SidebarMenuItem>
+            {/* <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={pathname.startsWith("/vehiculos")} tooltip="Vehículos">
                 <Link href="/vehiculos">
                   <Truck className="h-4 w-4" />
                   <span>Vehículos</span>
                 </Link>
               </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
+            </SidebarMenuItem> */}
+            {/* <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={pathname.startsWith("/usuarios")} tooltip="Usuarios">
                 <Link href="/usuarios">
                   <Users className="h-4 w-4" />
                   <span>Usuarios</span>
                 </Link>
               </SidebarMenuButton>
-            </SidebarMenuItem>
+            </SidebarMenuItem> */}
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={pathname.startsWith("/configuracion")} tooltip="Configuración">
                 <Link href="/configuracion">

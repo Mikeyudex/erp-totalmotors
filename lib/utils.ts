@@ -64,3 +64,12 @@ export const homologateImages = (images: string[]): WooImages[] => {
 
   return homologatedImages;
 };
+
+export function getModelSearchCategories(categories: Category[], parentCat:string): Category[] {
+  const targetParent = categories.find(cat => cat.name.toLowerCase() === parentCat.toLowerCase());
+
+  if (!targetParent) return [];
+
+  // Devolver las subcategorías (hijos directos)
+  return targetParent.children || [];
+}

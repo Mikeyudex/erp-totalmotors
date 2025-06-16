@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { Camera, Plus, Upload, Loader2, Info } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useImageProcessor } from "@/hooks/use-image-processor"
 import { formatFileSize, IMAGE_PRESETS } from "@/lib/image-utils"
 import type { ImageProcessingOptions } from "@/lib/image-utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 
 interface ImageUploadProps {
   onImageCapture: (imageUrl: string) => void
@@ -40,6 +42,9 @@ export function ImageUpload({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isCameraActive, setIsCameraActive] = useState(false)
   const [stream, setStream] = useState<MediaStream | null>(null)
+  const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>([])
+  const [selectedCameraId, setSelectedCameraId] = useState<string>("")
+  const [cameraError, setCameraError] = useState<string>("")
 
   const { toast } = useToast()
 
@@ -87,20 +92,60 @@ export function ImageUpload({
 
   const startCamera = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      })
+      setCameraError("")
+      setIsCameraActive(false)
+
+      // Primero obtener permisos y dispositivos
+      await navigator.mediaDevices.getUserMedia({ video: true })
+
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const videoDevices = devices.filter((device) => device.kind === "videoinput")
+      setAvailableCameras(videoDevices)
+
+      // Si no hay cámara seleccionada, usar la primera disponible
+      const deviceId = selectedCameraId || videoDevices[0]?.deviceId
+
+      const constraints: MediaStreamConstraints = {
+        video: {
+          deviceId: deviceId ? { exact: deviceId } : undefined,
+          width: { ideal: 1280, min: 640 },
+          height: { ideal: 720, min: 480 },
+          facingMode: deviceId ? undefined : { ideal: "environment" },
+        },
+      }
+
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
       setStream(mediaStream)
 
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream
-        videoRef.current.play()
-        setIsCameraActive(true)
+
+        // Esperar a que el video esté listo
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current
+            ?.play()
+            .then(() => {
+              setIsCameraActive(true)
+              console.log("Cámara iniciada correctamente")
+            })
+            .catch((playError) => {
+              console.error("Error al reproducir video:", playError)
+              setCameraError("Error al iniciar la reproducción del video")
+            })
+        }
+
+        videoRef.current.onerror = (error) => {
+          console.error("Error en el video:", error)
+          setCameraError("Error en la transmisión de video")
+        }
       }
     } catch (err) {
+      console.error("Error al iniciar cámara:", err)
+      const errorMessage = err instanceof Error ? err.message : "No se pudo acceder a la cámara"
+      setCameraError(errorMessage)
       toast({
         title: "Error de cámara",
-        description: "No se pudo acceder a la cámara",
+        description: errorMessage,
         variant: "destructive",
       })
     }
@@ -115,49 +160,93 @@ export function ImageUpload({
   }
 
   const capturePhoto = async () => {
-    if (videoRef.current && canvasRef.current) {
+    if (!videoRef.current || !canvasRef.current) {
+      toast({
+        title: "Error",
+        description: "Referencias de video o canvas no disponibles",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!isCameraActive || !stream) {
+      toast({
+        title: "Error",
+        description: "La cámara no está activa",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
       const video = videoRef.current
       const canvas = canvasRef.current
 
-      // Configurar el canvas con las dimensiones del video
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-
-      // Dibujar el frame actual del video en el canvas
-      const context = canvas.getContext("2d")
-      if (context) {
-        context.drawImage(video, 0, 0, canvas.width, canvas.height)
-
-        // Convertir el canvas a una URL de datos
-        const imageUrl = canvas.toDataURL("image/jpeg", 0.9)
-
-        try {
-          // Procesar la imagen capturada
-          const processedImage = await processImageFromDataUrl(imageUrl)
-
-          // Mostrar información de compresión
-          if (showCompressionInfo) {
-            setCompressionInfo({
-              originalSize: processedImage.originalSize,
-              compressedSize: processedImage.compressedSize,
-              compressionRatio: processedImage.compressionRatio,
-            })
-
-            toast({
-              title: "Foto procesada",
-              description: `Imagen optimizada: ${processedImage.dimensions.width}x${processedImage.dimensions.height}px`,
-            })
-          }
-
-          onImageCapture(processedImage.dataUrl)
-
-          // Cerrar el diálogo y detener la cámara
-          stopCamera()
-          setIsDialogOpen(false)
-        } catch (error) {
-          // El error ya se maneja en el hook
-        }
+      // Verificar que el video tenga datos
+      if (video.readyState < 2) {
+        toast({
+          title: "Esperando...",
+          description: "La cámara se está inicializando, intenta de nuevo",
+          variant: "destructive",
+        })
+        return
       }
+
+      // Obtener dimensiones reales del video
+      const videoWidth = video.videoWidth || 640
+      const videoHeight = video.videoHeight || 480
+
+      console.log(`Capturando: ${videoWidth}x${videoHeight}`)
+
+      // Configurar canvas
+      canvas.width = videoWidth
+      canvas.height = videoHeight
+
+      const context = canvas.getContext("2d")
+      if (!context) {
+        throw new Error("No se pudo obtener el contexto del canvas")
+      }
+
+      // Dibujar imagen (sin efecto espejo en la captura)
+      context.save()
+      context.scale(-1, 1) // Mantener el efecto espejo
+      context.drawImage(video, -videoWidth, 0, videoWidth, videoHeight)
+      context.restore()
+
+      // Convertir a imagen
+      const imageUrl = canvas.toDataURL("image/jpeg", 0.95)
+
+      if (imageUrl === "data:,") {
+        throw new Error("No se pudo capturar la imagen del video")
+      }
+
+      // Procesar imagen
+      const processedImage = await processImageFromDataUrl(imageUrl)
+
+      if (showCompressionInfo) {
+        setCompressionInfo({
+          originalSize: processedImage.originalSize,
+          compressedSize: processedImage.compressedSize,
+          compressionRatio: processedImage.compressionRatio,
+        })
+
+        toast({
+          title: "Foto capturada exitosamente",
+          description: `Imagen optimizada: ${processedImage.dimensions.width}x${processedImage.dimensions.height}px`,
+        })
+      }
+
+      onImageCapture(processedImage.dataUrl)
+      stopCamera()
+      setIsDialogOpen(false)
+    } catch (error) {
+      console.error("Error al capturar:", error)
+      const errorMessage = error instanceof Error ? error.message : "Error al capturar la foto"
+      toast({
+        title: "Error al capturar",
+        description: errorMessage,
+        variant: "destructive",
+      })
     }
   }
 
@@ -167,6 +256,26 @@ export function ImageUpload({
   }
 
   const currentPreset = IMAGE_PRESETS[preset]
+
+  const switchCamera = async (deviceId: string) => {
+    setSelectedCameraId(deviceId)
+    if (isCameraActive) {
+      stopCamera()
+      // Pequeño delay para asegurar que la cámara anterior se cierre
+      setTimeout(() => {
+        startCamera()
+      }, 100)
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      // Limpiar stream al desmontar el componente
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop())
+      }
+    }
+  }, [stream])
 
   return (
     <>
@@ -207,17 +316,115 @@ export function ImageUpload({
 
           {isCameraActive ? (
             <div className="flex flex-col items-center space-y-4">
-              <div className="relative w-full">
-                <video ref={videoRef} className="w-full rounded-md" autoPlay playsInline />
+              {/* Selector de cámara */}
+              {availableCameras.length > 1 && (
+                <div className="w-full">
+                  <Label htmlFor="camera-select" className="text-sm font-medium">
+                    Seleccionar cámara:
+                  </Label>
+                  <Select value={selectedCameraId} onValueChange={switchCamera}>
+                    <SelectTrigger className="w-full mt-1">
+                      <SelectValue placeholder="Seleccionar cámara" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableCameras.map((camera, index) => (
+                        <SelectItem key={camera.deviceId} value={camera.deviceId}>
+                          {camera.label || `Cámara ${index + 1}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Previsualizador mejorado */}
+              <div className="relative w-full max-w-md bg-black rounded-lg overflow-hidden">
+                <video
+                  ref={videoRef}
+                  className="w-full h-auto"
+                  autoPlay
+                  playsInline
+                  muted
+                  style={{
+                    transform: "scaleX(-1)",
+                    minHeight: "240px",
+                    maxHeight: "400px",
+                    objectFit: "cover",
+                  }}
+                  onLoadedData={() => console.log("Video data loaded")}
+                  onCanPlay={() => console.log("Video can play")}
+                  onPlaying={() => console.log("Video is playing")}
+                />
+
                 <canvas ref={canvasRef} className="hidden" />
+
+                {/* Overlays */}
+                <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                  {currentPreset.width}x{currentPreset.height}px
+                </div>
+
+                <div className="absolute top-2 right-2 flex items-center gap-1">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                  <span className="text-white text-xs">REC</span>
+                </div>
+
+                {/* Estado de la cámara */}
+                {!isCameraActive && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="text-white text-center">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+                      <p className="text-sm">Iniciando cámara...</p>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="flex justify-center space-x-2">
-                <Button onClick={capturePhoto} disabled={isProcessing}>
-                  {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Capturar"}
+
+              {/* Error display */}
+              {cameraError && (
+                <div className="w-full p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                  <p className="text-sm text-destructive font-medium">Error: {cameraError}</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => {
+                      setCameraError("")
+                      startCamera()
+                    }}
+                  >
+                    Reintentar
+                  </Button>
+                </div>
+              )}
+
+              {/* Controles */}
+              <div className="flex justify-center space-x-3">
+                <Button
+                  onClick={capturePhoto}
+                  disabled={isProcessing || !!cameraError || !isCameraActive}
+                  size="lg"
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                      Procesando...
+                    </>
+                  ) : (
+                    <>
+                      <Camera className="h-5 w-5 mr-2" />
+                      Capturar Foto
+                    </>
+                  )}
                 </Button>
-                <Button variant="outline" onClick={stopCamera} disabled={isProcessing}>
+                <Button variant="outline" onClick={stopCamera} disabled={isProcessing} size="lg">
                   Cancelar
                 </Button>
+              </div>
+
+              {/* Debug info */}
+              <div className="text-center text-xs text-muted-foreground">
+                Estado: {isCameraActive ? "Activa" : "Inactiva"} | Stream: {stream ? "Conectado" : "Desconectado"}
               </div>
             </div>
           ) : (
