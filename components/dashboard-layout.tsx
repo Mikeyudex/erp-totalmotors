@@ -18,8 +18,10 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
+// Importar los nuevos componentes de autenticación
+import { UserMenu } from "@/components/auth/user-menu"
+
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -96,12 +98,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
           <SidebarTrigger />
           <div className="ml-auto flex items-center gap-2">
-            <Button variant="outline" size="sm" className="hidden sm:flex">
-              Mi Cuenta
-            </Button>
-            <Button variant="outline" size="icon" className="sm:hidden">
-              <Users className="h-4 w-4" />
-            </Button>
+            <UserMenu />
           </div>
         </header>
         <div className="flex-1 overflow-auto">{children}</div>
