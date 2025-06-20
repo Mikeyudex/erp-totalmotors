@@ -120,6 +120,23 @@ export async function createProduct(product: CreateProductWoocommerce): Promise<
     }
 }
 
+export async function getNextSku(): Promise<number> {
+    try {
+        let token = await getToken(username, password);
+        const response = await fetch(`${API_URL}/sku/next`, {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+        if (!response.ok) throw new Error('Error al obtener el producto');
+        let data = await response.json();
+        return data?.next_sku || 0;
+    } catch (error) {
+        console.log("Error al obtener el sku:", error)
+        return 0;
+    }
+}
+
 /**
  * Actualiza un producto existente
  */

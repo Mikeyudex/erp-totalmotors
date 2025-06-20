@@ -38,7 +38,7 @@ export const createSlug = (name: string) => {
     .trim();
 };
 
-export const homologateCategory = (categories: Category[]): CategoryWoo[] => {
+export const homologateCategory = (categories: Category[], vehiculo?: string): CategoryWoo[] => {
 
   let homologatedCategories: CategoryWoo[] = [];
 
@@ -48,7 +48,9 @@ export const homologateCategory = (categories: Category[]): CategoryWoo[] => {
     };
     homologatedCategories.push(homologatedCategory);
   });
-
+  homologatedCategories.push({
+    id: parseInt(vehiculo!),
+  });
   return homologatedCategories;
 };
 
