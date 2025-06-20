@@ -137,6 +137,30 @@ export async function getNextSku(): Promise<number> {
     }
 }
 
+export async function uploadImage(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+        let token = await getToken(username, password);
+        const res = await fetch(`${API_URL}/media/upload`, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.detail || "Error al subir la imagen");
+        }
+        return await res.json();
+    } catch (error) {
+        console.error("Error subiendo imagen:", error);
+        throw error;
+    }
+}
+
 /**
  * Actualiza un producto existente
  */

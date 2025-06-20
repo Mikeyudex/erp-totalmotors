@@ -16,11 +16,11 @@ import { ComboboxForm } from "@/components/combobox-form"
 import { ImageUpload } from "@/components/image-upload"
 import { useToast } from "@/hooks/use-toast"
 
-import { createProduct, getNextSku } from "@/services/product-service";
+import { createProduct, getNextSku, uploadImage } from "@/services/product-service";
 import { CategoryTreeSelector } from "@/components/category-tree-selector"
-import type { Category, CreateProductWoocommerce } from "@/lib/types";
+import type { Category, CreateProductWoocommerce, WooImages } from "@/lib/types";
 import { getTreeCategories } from "@/services/category-service"
-import { createSlug, createTag, homologateCategory, homologateImages } from "@/lib/utils"
+import { createSlug, createTag, dataUrlToFile, homologateCategory, homologateImages } from "@/lib/utils"
 import { useCategories } from "@/hooks/useCategories"
 import { IMAGE_PRESETS } from "@/lib/image-utils"
 import type { ImageProcessingOptions } from "@/lib/image-utils"
@@ -58,7 +58,7 @@ export function ProductForm() {
   })
 
   // Estados del formulario
-  const [images, setImages] = useState<string[]>([])
+  const [images, setImages] = useState<WooImages[]>([])
   const [vehiculo, setVehiculo] = useState("")
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([])
   const { availableCategories, isLoadingCategories, modelCategories } = useCategories();
@@ -100,7 +100,7 @@ export function ProductForm() {
         price: productPrice,
         stock_quantity: Number.parseInt(productStock),
         tags: [createTag(productUbicacion)],
-        images: homologateImages(images),
+        images: images,
         manage_stock: true,
         meta_data: [
           {
@@ -157,19 +157,28 @@ export function ProductForm() {
       console.log(error);
       loading.showError(
         "Error al crear producto",
-        "Ocurrió un problema al guardar el producto. Error: " + error?.error || error?.message
+        "Ocurrió un problema al guardar el producto. Error: " + (error as Error).message
       )
       toast({
         title: "Error",
-        description: "No se pudo crear el producto. Error: " + error?.error || error?.message,
+        description: "No se pudo crear el producto. Error: " + (error as Error).message,
         variant: "destructive",
       })
     }
   }
 
-  const handleImageUpload = (newImage: string) => {
-    if (images.length < 4) {
-      setImages([...images, newImage])
+  const handleImageUpload = async (newImage: string) => {
+    if (images.length >= 4) return;
+    try {
+      const file = dataUrlToFile(newImage, `imagen-${Date.now()}.jpg`);
+      const uploaded = await uploadImage(file); // llamada al servicio que sube la imagen
+      setImages((prev) => [...prev, { id: uploaded?.id, src: uploaded?.source_url }]);
+    } catch (error) {
+      toast({
+        title: "Error subiendo imagen",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
     }
   }
 
@@ -419,7 +428,7 @@ export function ProductForm() {
                         <Card key={index} className="relative overflow-hidden">
                           <CardContent className="p-0">
                             <img
-                              src={image || "/placeholder.svg"}
+                              src={image.src || "/placeholder.svg"}
                               alt={`Producto ${index + 1}`}
                               className="w-full h-32 object-cover"
                             />
