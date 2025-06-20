@@ -2,7 +2,8 @@
 export interface User {
   id: string
   email: string
-  name: string
+  nombre: string
+  apellido: string
   role: string
   avatar?: string
   permissions: string[]

@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { Category, CategoryWoo, Tags, WooImages } from "./types";
+import { User } from "./auth-types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -65,11 +66,19 @@ export const homologateImages = (images: string[]): WooImages[] => {
   return homologatedImages;
 };
 
-export function getModelSearchCategories(categories: Category[], parentCat:string): Category[] {
+export function getModelSearchCategories(categories: Category[], parentCat: string): Category[] {
   const targetParent = categories.find(cat => cat.name.toLowerCase() === parentCat.toLowerCase());
 
   if (!targetParent) return [];
 
   // Devolver las subcategorías (hijos directos)
   return targetParent.children || [];
+}
+
+export function getPermissions(user: any): string[] {
+  if (!user) return ["read"];
+  let permissions: string[] = ["read"];
+  if (user?.rol === "admin") permissions.push("write", "delete");
+  if (user?.role === "operativo") permissions.push("read", "write");
+  return permissions;
 }

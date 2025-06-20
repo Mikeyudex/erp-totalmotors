@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 
-import { createCategory } from "@/services/category-service"
+//import { createCategory } from "@/services/category-service"
 
 export function CategoryForm() {
   const router = useRouter()
@@ -45,7 +45,7 @@ export function CategoryForm() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+/*   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
 
@@ -80,7 +80,7 @@ export function CategoryForm() {
     } finally {
       setIsSubmitting(false)
     }
-  }
+  } */
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -89,7 +89,7 @@ export function CategoryForm() {
           <CardTitle>Información de la Categoría</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre *</Label>
               <Input
@@ -124,7 +124,7 @@ export function CategoryForm() {
                 Crear Categoría
               </Button>
             </div>
-          </form>
+          </form> */}
         </CardContent>
       </Card>
     </div>

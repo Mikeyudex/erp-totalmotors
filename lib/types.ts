@@ -99,6 +99,7 @@ export interface CreateProductWoocommerce {
     variations?: any[];
     grouped_products?: any[];
     menu_order?: number;
+    meta_data?: any[];
 }
 
 export interface Tags {

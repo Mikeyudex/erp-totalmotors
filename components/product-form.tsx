@@ -25,6 +25,7 @@ import { useCategories } from "@/hooks/useCategories"
 import { IMAGE_PRESETS } from "@/lib/image-utils"
 import type { ImageProcessingOptions } from "@/lib/image-utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
+import { indexedDBManager } from "@/lib/indexeddb"
 
 // Datos de ejemplo para los selects
 const vehiculos = [
@@ -54,6 +55,12 @@ export function ProductForm() {
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([])
   const [categoriaModelo, setCategoriaModelo] = useState("");
   const { availableCategories, isLoadingCategories, modelCategories } = useCategories();
+  const [productName, setProductName] = useState("");
+  const [productPrice, setProductPrice] = useState("");
+  const [productStock, setProductStock] = useState("");
+  const [productUbicacion, setProductUbicacion] = useState("");
+  const [productNumeroParte, setProductNumeroParte] = useState("");
+
   // Estados para configuración de imágenes
   const [imagePreset, setImagePreset] = useState<keyof typeof IMAGE_PRESETS>("woocommerce")
   const [showImageSettings, setShowImageSettings] = useState(false)
@@ -75,20 +82,27 @@ export function ProductForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
-
     try {
-      const formData = new FormData(e.currentTarget)
+      let authData = await indexedDBManager.getAuthData();
+      let userId = authData?.user.id;
+
       const productData: CreateProductWoocommerce = {
         sku: generatedSku,
-        name: (formData.get("nombre") as string).toUpperCase(),
-        slug: createSlug(formData.get("nombre") as string),
-        description: `NÚMERO DE PARTE:  ${formData.get("numeroParte") as string}`,
+        name: productName.toUpperCase(),
+        slug: productName,
+        description: `NÚMERO DE PARTE:  ${productNumeroParte as string}`,
         categories: homologateCategory(selectedCategories),
-        price: formData.get("precio") as string,
-        stock_quantity: Number.parseInt(formData.get("stock") as string),
-        tags: [createTag(formData.get("ubicacion") as string)],
+        price: productPrice,
+        stock_quantity: Number.parseInt(productStock),
+        tags: [createTag(productUbicacion)],
         images: homologateImages(images),
         manage_stock: true,
+        meta_data: [
+          {
+            key: "_created_by_user_id",
+            value: userId
+          }
+        ]
       }
 
       console.log(productData);
@@ -113,6 +127,8 @@ export function ProductForm() {
 
       router.push("/productos")
     } catch (error) {
+      console.log(error);
+
       toast({
         title: "Error",
         description: "No se pudo crear el producto. Intente nuevamente.",
@@ -172,7 +188,13 @@ export function ProductForm() {
 
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="nombre">Nombre Producto *</Label>
-                    <Input id="nombre" name="nombre" placeholder="Ingrese el nombre del producto" required />
+                    <Input
+                      id="nombre"
+                      name="nombre"
+                      placeholder="Ingrese el nombre del producto"
+                      required
+                      value={productName}
+                      onChange={(e) => setProductName(e.target.value)} />
                   </div>
 
                   <div className="space-y-2 md:col-span-2">
@@ -223,22 +245,52 @@ export function ProductForm() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="ubicacion">Ubicación</Label>
-                    <Input id="ubicacion" name="ubicacion" placeholder="Ingrese la ubicación" required />
+                    <Input
+                      id="ubicacion"
+                      name="ubicacion"
+                      placeholder="Ingrese la ubicación"
+                      value={productUbicacion}
+                      onChange={(e) => setProductUbicacion(e.target.value)}
+                      required />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="numeroParte">Número de Parte</Label>
-                    <Input id="numeroParte" name="numeroParte" placeholder="Ingrese el número de parte" required />
+                    <Input
+                      id="numeroParte"
+                      name="numeroParte"
+                      placeholder="Ingrese el número de parte"
+                      value={productNumeroParte}
+                      onChange={(e) => setProductNumeroParte(e.target.value)}
+                      required />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="precio">Precio</Label>
-                    <Input id="precio" name="precio" type="number" placeholder="0.00" min="0" step="0.01" required />
+                    <Input
+                      id="precio"
+                      name="precio"
+                      type="number"
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                      value={productPrice}
+                      onChange={(e) => setProductPrice(e.target.value)}
+                      required />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="stock">Stock</Label>
-                    <Input id="stock" name="stock" type="number" placeholder="0" min="0" step="1" required />
+                    <Input
+                      id="stock"
+                      name="stock"
+                      type="number"
+                      placeholder="0"
+                      min="0"
+                      step="1"
+                      value={productStock}
+                      onChange={(e) => setProductStock(e.target.value)}
+                      required />
                   </div>
                 </div>
               </CardContent>

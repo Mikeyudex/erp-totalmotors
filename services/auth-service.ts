@@ -1,28 +1,29 @@
 import type { LoginCredentials, AuthResponse, User } from "@/lib/auth-types"
 import { indexedDBManager } from "@/lib/indexeddb"
+import { getPermissions } from "@/lib/utils";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
 
 export async function getToken(username: string, password: string): Promise<string> {
-    try {
-        const formData = new URLSearchParams();
-        formData.append("username", username ?? "");
-        formData.append("password", password ?? "");
-        const response = await fetch(`${API_URL}/api/login`, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: formData.toString(),
-        });
-        if (!response.ok) throw new Error('Error al iniciar sesión');
-        let data = await response.json();
-        return data?.access_token || null;
-    } catch (error) {
-        console.error("Error al iniciar sesión:", error)
-        throw error
-    }
-    
+  try {
+    const formData = new URLSearchParams();
+    formData.append("username", username ?? "");
+    formData.append("password", password ?? "");
+    const response = await fetch(`${API_URL}/api/login`, {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: formData.toString(),
+    });
+    if (!response.ok) throw new Error('Error al iniciar sesión');
+    let data = await response.json();
+    return data?.access_token || null;
+  } catch (error) {
+    console.error("Error al iniciar sesión:", error)
+    throw error
+  }
+
 }
 
 // Datos de ejemplo para simular respuestas de la API
@@ -52,33 +53,35 @@ const mockUsers = [
  */
 export async function login(credentials: LoginCredentials): Promise<AuthResponse> {
   try {
-    // En un entorno real, haríamos una solicitud POST a la API
-    // const response = await fetch(`${API_URL}/auth/login`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify(credentials),
-    // });
-    // if (!response.ok) throw new Error('Error al iniciar sesión');
-    // return await response.json();
-
-    // Simulamos una respuesta de la API
-    await new Promise((resolve) => setTimeout(resolve, 1000)) // Simular latencia de red
-
-    const user = mockUsers.find((u) => u.email === credentials.email && u.password === credentials.password)
+    const response = await fetch(`${API_URL}/users/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
+    if (!response.ok) throw new Error('Error al iniciar sesión');
+    let data = await response.json();
+    const user = data?.user || null;
 
     if (!user) {
       throw new Error("Credenciales inválidas")
     }
-
-    const { password, ...userWithoutPassword } = user
-    const token = `mock_token_${user.id}_${Date.now()}`
-    const refreshToken = `mock_refresh_token_${user.id}_${Date.now()}`
+    let userMap: User = {
+      id: user._id,
+      email: user?.email,
+      nombre: user?.nombre,
+      apellido: user?.apellido,
+      role: user?.rol,
+      avatar: user?.avatar,
+      permissions: getPermissions(user),
+    }
+    const token = data?.access_token || null;
+    const refreshToken = `mock_refresh_token_${user._id}_${Date.now()}`
     const expiresIn = 24 * 60 * 60 * 1000 // 24 horas
 
     const authResponse: AuthResponse = {
-      user: userWithoutPassword,
+      user: userMap,
       token,
       refreshToken,
       expiresIn,
@@ -86,7 +89,7 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
 
     // Guardar en IndexedDB
     await indexedDBManager.setAuthData({
-      user: userWithoutPassword,
+      user: userMap,
       token,
       refreshToken,
       expiresAt: Date.now() + expiresIn,
