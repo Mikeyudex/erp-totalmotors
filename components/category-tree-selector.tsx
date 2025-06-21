@@ -62,27 +62,22 @@ export function CategoryTreeSelector({
 
     const toggleCategory = (category: Category) => {
         const newSelected = new Set(selectedIds)
-
         const descendantIds = getAllDescendantIds(category)
+        const parentIds = getImmediateParentId(category)
 
         if (isChecked(category)) {
-            // Si está seleccionado, desmarcar padre e hijos
+            // Desmarcar categoría, hijos y padres
             newSelected.delete(category.id)
             descendantIds.forEach(id => newSelected.delete(id))
+            parentIds.forEach(id => newSelected.delete(id))
         } else {
-            // Si no está seleccionado, marcar padre e hijos
+            // Marcar categoría, hijos y padres
             newSelected.add(category.id)
             descendantIds.forEach(id => newSelected.add(id))
+            parentIds.forEach(id => newSelected.add(id))
         }
 
-        // También actualizamos padres: si todos los hijos están seleccionados, marcar padre
-        // (Recursivo hacia arriba se puede implementar si tienes la info de padre)
-
-        // Convertimos el Set a array y filtramos categorías originales
-        const updatedSelected = categories
-            .flatMap(flattenCategories)
-            .filter(cat => newSelected.has(cat.id))
-
+        const updatedSelected = allCategoriesFlat.filter(cat => newSelected.has(cat.id))
         onSelectionChange(updatedSelected)
     }
 
@@ -95,6 +90,22 @@ export function CategoryTreeSelector({
             }
         }
         return result
+    }
+    const allCategoriesFlat = useMemo(
+        () => categories.flatMap(flattenCategories),
+        [categories]
+    )
+
+    const categoryMap = useMemo(() => {
+        const map = new Map<number, Category>()
+        for (const cat of allCategoriesFlat) {
+            map.set(cat.id, cat)
+        }
+        return map
+    }, [allCategoriesFlat])
+
+    const getImmediateParentId = (category: Category): number[] => {
+        return category.parent ? [category.parent] : []
     }
 
     const filterCategories = (cats: Category[], term: string): Category[] => {

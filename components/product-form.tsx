@@ -60,6 +60,7 @@ export function ProductForm() {
   // Estados del formulario
   const [images, setImages] = useState<WooImages[]>([])
   const [vehiculo, setVehiculo] = useState("")
+  const [nombreVehiculo, setNombreVehiculo] = useState<any>("")
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([])
   const { availableCategories, isLoadingCategories, modelCategories } = useCategories();
   const [productName, setProductName] = useState("");
@@ -93,11 +94,11 @@ export function ProductForm() {
       let userId = authData?.user.id;
       const productData: CreateProductWoocommerce = {
         sku: productSku.toString(),
-        name: productName.toUpperCase(),
-        slug: productName,
+        name: `${productName.toUpperCase()} ${nombreVehiculo}`,
+        slug: createSlug(`${productName} ${nombreVehiculo}`),
         description: `NÚMERO DE PARTE:  ${productNumeroParte as string}`,
         categories: homologateCategory(selectedCategories, vehiculo),
-        price: productPrice,
+        regular_price: productPrice,
         stock_quantity: Number.parseInt(productStock),
         tags: [createTag(productUbicacion)],
         images: images,
@@ -172,7 +173,7 @@ export function ProductForm() {
     try {
       const file = dataUrlToFile(newImage, `imagen-${Date.now()}.jpg`);
       const uploaded = await uploadImage(file); // llamada al servicio que sube la imagen
-      setImages((prev) => [...prev, { id: uploaded?.id, src: uploaded?.source_url }]);
+      setImages((prev) => [...prev, { id: uploaded?.id, src: uploaded?.url }]);
     } catch (error) {
       toast({
         title: "Error subiendo imagen",
@@ -186,6 +187,12 @@ export function ProductForm() {
     const newImages = [...images]
     newImages.splice(index, 1)
     setImages(newImages)
+  }
+
+  const handleChangeVehiculo = (value: string) => {
+    setVehiculo(value)
+    let vehiculo = modelCategories.find(category => String(category.id) === value)?.name
+    setNombreVehiculo(vehiculo)
   }
 
   const currentPreset = IMAGE_PRESETS[imagePreset]
@@ -223,7 +230,7 @@ export function ProductForm() {
                         id="vehiculo"
                         options={modelCategories.map(category => ({ label: category.name, value: category.id.toString() }))}
                         value={vehiculo}
-                        onChange={setVehiculo}
+                        onChange={(val) => handleChangeVehiculo(val)}
                         placeholder="Seleccione un vehículo"
                       />
                     </div>

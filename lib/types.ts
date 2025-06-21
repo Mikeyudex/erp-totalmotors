@@ -50,8 +50,8 @@ export interface CreateProductWoocommerce {
     slug?: string;
     description?: string;
     short_description?: string;
-    price: string;
-    regular_price?: number;
+    price?: string;
+    regular_price: string;
     sale_price?: number;
     date_on_sale_from?: string;
     date_on_sale_from_gmt?: string;
