@@ -4,7 +4,7 @@ import type React from "react"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Box, Home, Package, Settings, Truck, Users, Tag } from "lucide-react"
+import { Box, Home, Package, Settings, Truck, Users, Tag, BarChart3 } from "lucide-react"
 
 import {
   Sidebar,
@@ -62,27 +62,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            {/* <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={pathname.startsWith("/vehiculos")} tooltip="Vehículos">
-                <Link href="/vehiculos">
-                  <Truck className="h-4 w-4" />
-                  <span>Vehículos</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem> */}
-            {/* <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={pathname.startsWith("/usuarios")} tooltip="Usuarios">
-                <Link href="/usuarios">
-                  <Users className="h-4 w-4" />
-                  <span>Usuarios</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem> */}
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={pathname.startsWith("/configuracion")} tooltip="Configuración">
-                <Link href="/configuracion">
-                  <Settings className="h-4 w-4" />
-                  <span>Configuración</span>
+              <SidebarMenuButton asChild isActive={pathname.startsWith("/reportes")} tooltip="Reportes">
+                <Link href="/reportes">
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Reportes</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

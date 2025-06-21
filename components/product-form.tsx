@@ -108,7 +108,8 @@ export function ProductForm() {
             key: "_created_by_user_id",
             value: userId
           }
-        ]
+        ],
+        user_id: userId,
       }
 
       // Validaciones básicas

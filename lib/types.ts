@@ -100,6 +100,7 @@ export interface CreateProductWoocommerce {
     grouped_products?: any[];
     menu_order?: number;
     meta_data?: any[];
+    user_id?: string;
 }
 
 export interface Tags {
