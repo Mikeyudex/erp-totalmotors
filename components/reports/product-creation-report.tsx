@@ -292,7 +292,7 @@ export function ProductCreationReport() {
         </Card>
 
         {/* Resumen */}
-        {/*    {summary && (
+        {summary && (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -340,7 +340,7 @@ export function ProductCreationReport() {
               </CardContent>
             </Card>
           </div>
-        )} */}
+        )}
 
         {/* Tabla de Resultados */}
         <Card>
@@ -388,10 +388,10 @@ export function ProductCreationReport() {
                               <TableCell className="font-medium">
                                 <div className="flex items-center gap-2">
                                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                                  {new Date(report.date).toLocaleDateString("es-ES", {
-                                    weekday: "short",
+                                  {new Date(report.date + "T12:00:00").toLocaleDateString("es-ES", {
+                                    weekday: "long",
                                     year: "numeric",
-                                    month: "short",
+                                    month: "long",
                                     day: "numeric",
                                   })}
                                 </div>
@@ -455,7 +455,12 @@ export function ProductCreationReport() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                                <span className="font-medium">{new Date(report.date).toLocaleDateString("es-ES")}</span>
+                                <span className="font-medium">{new Date(report.date + "T12:00:00").toLocaleDateString("es-ES", {
+                                  weekday: "long",
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })}</span>
                               </div>
                               <Badge variant="secondary" className="font-mono">
                                 {report.productsCreated} productos

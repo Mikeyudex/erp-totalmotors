@@ -149,7 +149,13 @@ export async function getCurrentUser(): Promise<User | null> {
  */
 export async function isTokenValid(): Promise<boolean> {
   try {
-    return await indexedDBManager.isTokenValid()
+    const isValid = await indexedDBManager.isTokenValid()
+
+    if (!isValid) {
+      console.warn("Token inválido o expirado detectado en isTokenValid()")
+    }
+
+    return isValid
   } catch (error) {
     console.error("Error al verificar token:", error)
     return false

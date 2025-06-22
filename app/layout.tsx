@@ -4,9 +4,8 @@ import { Inter } from "next/font/google"
 
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
-
-// Importar el AuthProvider
 import { AuthProvider } from "@/hooks/use-auth"
+import { SessionMonitor } from "@/components/auth/session-monitor"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -19,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AuthProvider>
             {children}
             <Toaster />
+             <SessionMonitor showInDevelopment={true} />
           </AuthProvider>
         </ThemeProvider>
       </body>

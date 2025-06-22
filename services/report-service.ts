@@ -90,74 +90,25 @@ export async function getReportUsers(): Promise<ReportUser[]> {
  */
 export async function getProductCreationReport(filters: ReportFilters): Promise<ReportResponse> {
   try {
-    // En un entorno real, haríamos una solicitud fetch a la API
-    // const queryParams = new URLSearchParams({
-    //   page: filters.page.toString(),
-    //   limit: filters.limit.toString(),
-    //   ...(filters.userId && { userId: filters.userId }),
-    //   ...(filters.startDate && { startDate: filters.startDate }),
-    //   ...(filters.endDate && { endDate: filters.endDate }),
-    // });
-    // const response = await fetch(`${API_URL}/reports/product-creation?${queryParams}`);
-    // if (!response.ok) throw new Error('Error al obtener reporte');
-    // return await response.json();
-
-    // Simulamos una respuesta con datos de ejemplo
-    await new Promise((resolve) => setTimeout(resolve, 800))
-
-    const allReports = generateMockReportData(filters)
-
-    // Aplicar paginación
-    const startIndex = (filters.page - 1) * filters.limit
-    const endIndex = startIndex + filters.limit
-    const paginatedReports = allReports.slice(startIndex, endIndex)
-
-    // Calcular resumen
-    const totalProducts = allReports.reduce((sum, report) => sum + report.productsCreated, 0)
-    const uniqueUsers = new Set(allReports.map((r) => r.userId))
-    const totalUsers = uniqueUsers.size
-    const totalDays = new Set(allReports.map((r) => r.date)).size
-    const averageProductsPerDay = totalDays > 0 ? totalProducts / totalDays : 0
-
-    // Usuario más activo
-    const userProductCounts = new Map<string, { name: string; count: number }>()
-    allReports.forEach((report) => {
-      const current = userProductCounts.get(report.userId) || { name: report.userName, count: 0 }
-      current.count += report.productsCreated
-      userProductCounts.set(report.userId, current)
+    const queryParams = new URLSearchParams({
+      page: filters.page.toString(),
+      limit: filters.limit.toString(),
+      ...(filters.userId && { user_id: filters.userId }),
+      ...(filters.startDate && { start_date: filters.startDate }),
+      ...(filters.endDate && { end_date: filters.endDate }),
     })
 
-    const mostActiveUserEntry = Array.from(userProductCounts.entries()).sort(([, a], [, b]) => b.count - a.count)[0]
+    const response = await fetch(`${API_URL}/reports/products?${queryParams}`)
 
-    const summary: ReportSummary = {
-      totalProducts,
-      totalUsers,
-      averageProductsPerDay: Math.round(averageProductsPerDay * 100) / 100,
-      mostActiveUser: mostActiveUserEntry
-        ? {
-            id: mostActiveUserEntry[0],
-            name: mostActiveUserEntry[1].name,
-            totalProducts: mostActiveUserEntry[1].count,
-          }
-        : { id: "", name: "N/A", totalProducts: 0 },
-      dateRange: {
-        startDate: filters.startDate || "",
-        endDate: filters.endDate || "",
-      },
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Error ${response.status}: ${error}`)
     }
 
-    return {
-      data: paginatedReports,
-      summary,
-      meta: {
-        currentPage: filters.page,
-        totalPages: Math.ceil(allReports.length / filters.limit),
-        totalItems: allReports.length,
-        itemsPerPage: filters.limit,
-      },
-    }
+    const data = await response.json()
+    return data as ReportResponse
   } catch (error) {
-    console.error("Error al obtener reporte de creación de productos:", error)
+    console.error("Error al obtener el reporte de creación de productos:", error)
     throw error
   }
 }
