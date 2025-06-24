@@ -91,63 +91,199 @@ export function ImageUpload({
   }
 
   const startCamera = async () => {
+    console.log("=== INICIO startCamera ===")
+
     try {
+      // Verificaciones básicas
+      if (!navigator) {
+        throw new Error("Navigator no disponible")
+      }
+
+      if (!navigator.mediaDevices) {
+        throw new Error("MediaDevices no disponible")
+      }
+
+      if (!navigator.mediaDevices.getUserMedia) {
+        throw new Error("getUserMedia no disponible")
+      }
+
+      console.log("✅ APIs básicas disponibles")
+
       setCameraError("")
-      setIsCameraActive(false)
 
-      // Primero obtener permisos y dispositivos
-      await navigator.mediaDevices.getUserMedia({ video: true })
+      // Detener stream anterior si existe
+      if (stream) {
+        console.log("Deteniendo stream anterior...")
+        stream.getTracks().forEach((track) => track.stop())
+        setStream(null)
+      }
 
-      const devices = await navigator.mediaDevices.enumerateDevices()
-      const videoDevices = devices.filter((device) => device.kind === "videoinput")
-      setAvailableCameras(videoDevices)
+      // Reemplazar esta sección:
+      // Configuración simple inicial
+      // const basicConstraints: MediaStreamConstraints = {
+      //   video: {
+      //     width: { ideal: 1280, min: 640 },
+      //     height: { ideal: 720, min: 480 },
+      //     facingMode: { ideal: "environment" },
+      //   },
+      // }
 
-      // Si no hay cámara seleccionada, usar la primera disponible
-      const deviceId = selectedCameraId || videoDevices[0]?.deviceId
+      // Con esta nueva lógica más flexible:
+      console.log("Intentando con constraints flexibles...")
 
-      const constraints: MediaStreamConstraints = {
+      // Intentar con diferentes niveles de constraints
+      const constraintOptions = [
+        // Opción 1: Constraints básicas sin facingMode
+        {
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+        },
+        // Opción 2: Solo dimensiones ideales más bajas
+        {
+          video: {
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+          },
+        },
+        // Opción 3: Completamente básico
+        {
+          video: true,
+        },
+      ]
+
+      let mediaStream: MediaStream | null = null
+      let lastError: any = null
+
+      // Intentar cada opción hasta que una funcione
+      for (let i = 0; i < constraintOptions.length; i++) {
+        try {
+          console.log(`Intentando opción ${i + 1}:`, constraintOptions[i])
+          mediaStream = await navigator.mediaDevices.getUserMedia(constraintOptions[i])
+          console.log(`✅ Éxito con opción ${i + 1}`)
+          break
+        } catch (err) {
+          console.log(`❌ Falló opción ${i + 1}:`, err)
+          lastError = err
+          continue
+        }
+      }
+
+      if (!mediaStream) {
+        throw lastError || new Error("No se pudo obtener acceso a la cámara con ninguna configuración")
+      }
+
+      const basicConstraints: MediaStreamConstraints = {
         video: {
-          deviceId: deviceId ? { exact: deviceId } : undefined,
           width: { ideal: 1280, min: 640 },
           height: { ideal: 720, min: 480 },
-          facingMode: deviceId ? undefined : { ideal: "environment" },
+          facingMode: { ideal: "environment" },
         },
       }
 
-      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
-      setStream(mediaStream)
+      console.log("Solicitando acceso a cámara con constraints:", basicConstraints)
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream
+      // Obtener stream
+      const mediaStream2 = await navigator.mediaDevices.getUserMedia(basicConstraints)
 
-        // Esperar a que el video esté listo
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current
-            ?.play()
-            .then(() => {
-              setIsCameraActive(true)
-              console.log("Cámara iniciada correctamente")
-            })
-            .catch((playError) => {
-              console.error("Error al reproducir video:", playError)
-              setCameraError("Error al iniciar la reproducción del video")
-            })
-        }
+      console.log("✅ Stream obtenido exitosamente")
 
-        videoRef.current.onerror = (error) => {
-          console.error("Error en el video:", error)
-          setCameraError("Error en la transmisión de video")
-        }
+      if (!mediaStream2) {
+        throw new Error("Stream es null o undefined")
       }
-    } catch (err) {
-      console.error("Error al iniciar cámara:", err)
-      const errorMessage = err instanceof Error ? err.message : "No se pudo acceder a la cámara"
+
+      const tracks = mediaStream2.getVideoTracks()
+      console.log("Tracks de video encontrados:", tracks.length)
+
+      if (tracks.length === 0) {
+        throw new Error("No se encontraron tracks de video")
+      }
+
+      setStream(mediaStream2)
+      console.log("✅ Stream guardado en estado")
+
+      // Verificar referencia de video
+      if (!videoRef.current) {
+        throw new Error("Referencia de video no disponible")
+      }
+
+      console.log("✅ Referencia de video disponible")
+
+      // Asignar stream al video
+      videoRef.current.srcObject = mediaStream2
+      console.log("✅ Stream asignado al elemento video")
+
+      // Marcar como activo
+      setIsCameraActive(true)
+      console.log("✅ Cámara marcada como activa")
+
+      // Obtener dispositivos después del éxito
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices()
+        const videoDevices = devices.filter((device) => device.kind === "videoinput")
+        console.log("Dispositivos de video encontrados:", videoDevices.length)
+        setAvailableCameras(videoDevices)
+      } catch (deviceError) {
+        console.warn("No se pudieron enumerar dispositivos:", deviceError)
+        // No es crítico, continuar
+      }
+
+      // Intentar reproducir
+      try {
+        if (videoRef.current) {
+          await videoRef.current.play()
+          console.log("✅ Video reproduciéndose")
+        }
+      } catch (playError) {
+        console.warn("Advertencia al reproducir:", playError)
+        // No es crítico si el stream funciona
+      }
+
+      console.log("=== FIN startCamera EXITOSO ===")
+    } catch (error: any) {
+      console.log("=== ERROR EN startCamera ===")
+      console.error("Tipo de error:", typeof error)
+      console.error("Error completo:", error)
+      console.error("Error.name:", error?.name)
+      console.error("Error.message:", error?.message)
+      console.error("Error.stack:", error?.stack)
+
+      // Limpiar estado
+      setIsCameraActive(false)
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop())
+        setStream(null)
+      }
+
+      // Determinar mensaje de error
+      let errorMessage = "Error desconocido"
+
+      if (error && typeof error === "object") {
+        if ("message" in error && error.message) {
+          errorMessage = String(error.message)
+        } else if ("name" in error && error.name) {
+          errorMessage = `Error: ${error.name}`
+        } else {
+          errorMessage = "Error de objeto sin mensaje"
+        }
+      } else if (typeof error === "string") {
+        errorMessage = error
+      } else {
+        errorMessage = `Error de tipo: ${typeof error}`
+      }
+
+      console.error("Mensaje final de error:", errorMessage)
+
       setCameraError(errorMessage)
+
       toast({
         title: "Error de cámara",
         description: errorMessage,
         variant: "destructive",
       })
+
+      console.log("=== FIN ERROR startCamera ===")
     }
   }
 

@@ -28,6 +28,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { indexedDBManager } from "@/lib/indexeddb"
 import { LoadingOverlay } from "@/components/ui/loading-overlay"
 import { useLoading } from "@/hooks/use-loading"
+import CameraUploader from "./camera-preview"
+import { ImagePickerModal } from "./ImagePickerModal"
 
 // Datos de ejemplo para los selects
 const vehiculos = [
@@ -454,7 +456,9 @@ export function ProductForm() {
                       ))}
 
                       {images.length < 4 && (
-                        <ImageUpload
+
+                        <ImagePickerModal
+                          currentCount={images.length}
                           onImageCapture={handleImageUpload}
                           preset={imagePreset}
                           customOptions={customImageOptions}
@@ -467,6 +471,13 @@ export function ProductForm() {
               </CollapsibleContent>
             </Card>
           </Collapsible>
+
+          {/* <CameraUploader
+                          onImageCapture={handleImageUpload}
+                          preset={imagePreset}
+                          customOptions={customImageOptions}
+                          showCompressionInfo={true}
+                        /> */}
 
           {/* Botones de acción */}
           <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6">

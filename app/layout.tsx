@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AuthProvider>
             {children}
             <Toaster />
-             <SessionMonitor showInDevelopment={false} />
+             {/* <SessionMonitor showInDevelopment={false} /> */}
           </AuthProvider>
         </ThemeProvider>
       </body>

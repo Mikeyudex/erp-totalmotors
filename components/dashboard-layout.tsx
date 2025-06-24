@@ -54,14 +54,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <SidebarMenuItem>
+            {/* <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={pathname.startsWith("/categorias")} tooltip="Categorías">
                 <Link href="/categorias">
                   <Tag className="h-4 w-4" />
                   <span>Categorías</span>
                 </Link>
               </SidebarMenuButton>
-            </SidebarMenuItem>
+            </SidebarMenuItem> */}
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={pathname.startsWith("/reportes")} tooltip="Reportes">
                 <Link href="/reportes">
