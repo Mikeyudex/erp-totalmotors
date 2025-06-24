@@ -1,9 +1,9 @@
 module.exports = {
   apps: [{
     name: 'ERP-TOTALMOTORS-FRONTEND - PORT 3000',
-    script: './node_modules/.bin/next',
+    script: 'npm',
     args: 'start',
-    cwd: '/app',
+    cwd: '/home/ubuntu/erp-totalmotors',
     instances: 1,
     exec_mode: 'fork',
     env: {
