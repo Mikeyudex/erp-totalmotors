@@ -2,7 +2,7 @@
 export const IMAGE_PRESETS = {
   woocommerce: {
     width: 800,
-    height: 536,
+    height: 800,
     quality: 0.85,
     format: "image/jpeg" as const,
   },
