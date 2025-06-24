@@ -77,6 +77,7 @@ export function ProductForm() {
   const [showImageSettings, setShowImageSettings] = useState(false)
   const [customImageOptions, setCustomImageOptions] = useState<Partial<ImageProcessingOptions>>({})
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
 
   // Estados para controlar las secciones colapsables
   const [isBasicInfoOpen, setIsBasicInfoOpen] = useState(true)
@@ -175,6 +176,7 @@ export function ProductForm() {
   const handleImageUpload = async (newImage: string) => {
     if (images.length >= 4) return;
     try {
+      setIsUploading(true)
       const file = dataUrlToFile(newImage, `imagen-${Date.now()}.jpg`);
       const uploaded = await uploadImage(file); // llamada al servicio que sube la imagen
       setImages((prev) => [...prev, { id: uploaded?.id, src: uploaded?.url }]);
@@ -184,6 +186,8 @@ export function ProductForm() {
         description: (error as Error).message,
         variant: "destructive",
       });
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -458,11 +462,17 @@ export function ProductForm() {
 
                       {images.length < 4 && (
                         <div className="flex flex-col items-center justify-center border border-dashed border-muted rounded-xl h-32 hover:bg-muted/30 cursor-pointer transition-colors">
+                          {isUploading && (
+                            <div className="flex items-center justify-center col-span-full">
+                              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary" />
+                            </div>
+                          )}
                           <Button
                             type="button"
                             variant="ghost"
                             onClick={() => setIsImagePickerOpen(true)}
                             className="text-sm"
+                            disabled={isUploading}
                           >
                             + Agregar Imagen
                           </Button>
