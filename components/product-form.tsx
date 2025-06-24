@@ -29,7 +29,7 @@ import { indexedDBManager } from "@/lib/indexeddb"
 import { LoadingOverlay } from "@/components/ui/loading-overlay"
 import { useLoading } from "@/hooks/use-loading"
 import CameraUploader from "./camera-preview"
-import { ImagePickerModal } from "./ImagePickerModal"
+import ImagePickerModal from "./ImagePickerModal"
 
 // Datos de ejemplo para los selects
 const vehiculos = [
@@ -76,6 +76,7 @@ export function ProductForm() {
   const [imagePreset, setImagePreset] = useState<keyof typeof IMAGE_PRESETS>("woocommerce")
   const [showImageSettings, setShowImageSettings] = useState(false)
   const [customImageOptions, setCustomImageOptions] = useState<Partial<ImageProcessingOptions>>({})
+  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false)
 
   // Estados para controlar las secciones colapsables
   const [isBasicInfoOpen, setIsBasicInfoOpen] = useState(true)
@@ -456,14 +457,16 @@ export function ProductForm() {
                       ))}
 
                       {images.length < 4 && (
-
-                        <ImagePickerModal
-                          currentCount={images.length}
-                          onImageCapture={handleImageUpload}
-                          preset={imagePreset}
-                          customOptions={customImageOptions}
-                          showCompressionInfo={true}
-                        />
+                        <div className="flex flex-col items-center justify-center border border-dashed border-muted rounded-xl h-32 hover:bg-muted/30 cursor-pointer transition-colors">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setIsImagePickerOpen(true)}
+                            className="text-sm"
+                          >
+                            + Agregar Imagen
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -495,6 +498,14 @@ export function ProductForm() {
               )}
             </Button>
           </div>
+          <ImagePickerModal
+            open={isImagePickerOpen}
+            setOpen={setIsImagePickerOpen}
+            onImageCapture={handleImageUpload}
+            preset={imagePreset}
+            customOptions={customImageOptions}
+            showCompressionInfo={true}
+          />
         </form>
       </div>
     </>
