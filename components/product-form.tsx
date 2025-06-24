@@ -410,7 +410,7 @@ export function ProductForm() {
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="woocommerce">WooCommerce (800x536px) - Recomendado</SelectItem>
+                                    <SelectItem value="woocommerce">WooCommerce (800x800px) - Recomendado</SelectItem>
                                     <SelectItem value="gallery">Galería (1200x800px) - Alta calidad</SelectItem>
                                     <SelectItem value="thumbnail">Miniatura (300x200px) - Rápida carga</SelectItem>
                                   </SelectContent>
