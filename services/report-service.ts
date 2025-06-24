@@ -69,7 +69,7 @@ const generateMockReportData = (filters: ReportFilters): ProductCreationReport[]
  */
 export async function getReportUsers(): Promise<ReportUser[]> {
   try {
-    const response = await fetch(`${API_URL}/users`);
+    const response = await fetch(`${API_URL}/users/`);
     if (!response.ok) throw new Error('Error al obtener usuarios');
     let data = await response.json();
     let mapUsers: ReportUser[] = data?.map((user: any) => ({
