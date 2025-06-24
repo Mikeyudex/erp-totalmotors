@@ -35,7 +35,13 @@ export function ComboboxForm({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent
+        className="w-full p-0 z-50" 
+        side="bottom"
+        align="start"
+        sideOffset={4}
+        avoidCollisions={false} // Desactiva el comportamiento automático de colisión
+        >
         <Command>
           <CommandInput placeholder={`Buscar ${placeholder.toLowerCase()}`} />
           <CommandList>
