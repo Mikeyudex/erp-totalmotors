@@ -14,6 +14,15 @@ export interface LoginCredentials {
   password: string
 }
 
+export interface RegisterData {
+  email: string
+  documento: string
+  password: string
+  nombre: string
+  apellido: string
+  rol: "admin" | "operativo"
+}
+
 export interface AuthResponse {
   user: User
   token: string
@@ -27,4 +36,10 @@ export interface AuthState {
   refreshToken: string | null
   isAuthenticated: boolean
   isLoading: boolean
+}
+
+export interface RegisterResponse {
+  success: boolean
+  message: string
+  user?: Omit<User, "permissions | avatar">
 }

@@ -1,7 +1,7 @@
-import type { LoginCredentials, AuthResponse, User } from "@/lib/auth-types"
+import type { LoginCredentials, AuthResponse, User, RegisterData, RegisterResponse } from "@/lib/auth-types"
 import { indexedDBManager } from "@/lib/indexeddb"
 import { getPermissions } from "@/lib/utils";
-const API_URL = process.env.NEXT_PUBLIC_ENV === "LOCAL" ? process.env.NEXT_PUBLIC_API_URL_LOCAL  : process.env.NEXT_PUBLIC_API_URL
+const API_URL = process.env.NEXT_PUBLIC_ENV === "LOCAL" ? process.env.NEXT_PUBLIC_API_URL_LOCAL : process.env.NEXT_PUBLIC_API_URL
 
 
 export async function getToken(username: string, password: string): Promise<string> {
@@ -25,28 +25,6 @@ export async function getToken(username: string, password: string): Promise<stri
   }
 
 }
-
-// Datos de ejemplo para simular respuestas de la API
-const mockUsers = [
-  {
-    id: "1",
-    email: "admin@example.com",
-    password: "admin123",
-    name: "Administrador",
-    role: "admin",
-    avatar: "/placeholder.svg?height=40&width=40",
-    permissions: ["read", "write", "delete", "admin"],
-  },
-  {
-    id: "2",
-    email: "user@example.com",
-    password: "user123",
-    name: "Usuario",
-    role: "user",
-    avatar: "/placeholder.svg?height=40&width=40",
-    permissions: ["read", "write"],
-  },
-]
 
 /**
  * Inicia sesión con email y contraseña
@@ -98,6 +76,29 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
     return authResponse
   } catch (error) {
     console.error("Error en login:", error)
+    throw error
+  }
+}
+
+export async function register(userData: RegisterData): Promise<RegisterResponse> {
+  try {
+    // En un entorno real, haríamos una solicitud POST a la API
+    const response = await fetch(`${API_URL}/users/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+    if (!response.ok) throw new Error('Error al registrar usuario');
+    let newUser = await response.json();
+    return {
+      success: true,
+      message: "Usuario registrado exitosamente",
+      user: newUser,
+    }
+  } catch (error) {
+    console.error("Error en registro:", error)
     throw error
   }
 }

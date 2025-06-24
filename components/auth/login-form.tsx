@@ -6,6 +6,7 @@ import { useState } from "react"
 import { Eye, EyeOff, Loader2, LogIn } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -46,12 +47,17 @@ export function LoginForm() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Sistema ERP</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Gestión empresarial integrada</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">TotalMotors ERP</h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">Gestión de productos</p>
         </div>
 
         <Card>
           <CardHeader className="space-y-1">
+            <img
+              src="/Logo-DOF1-768x552.png"
+              alt="Logo TotalMotors"
+              className="mx-auto mb-4 h-16 w-25"
+            />
             <CardTitle className="text-2xl text-center">Iniciar Sesión</CardTitle>
             <CardDescription className="text-center">Ingresa tus credenciales para acceder al sistema</CardDescription>
           </CardHeader>
@@ -112,10 +118,17 @@ export function LoginForm() {
                   </>
                 )}
               </Button>
+              {/* Link al registro */}
+              <div className="text-center text-sm">
+                <span className="text-muted-foreground">¿No tienes una cuenta? </span>
+                <Link href="/registro" className="text-primary hover:underline font-medium">
+                  Crear Cuenta
+                </Link>
+              </div>
             </form>
 
             {/* Credenciales de prueba */}
-            <div className="mt-6 p-4 bg-muted rounded-lg">
+            {/* <div className="mt-6 p-4 bg-muted rounded-lg">
               <p className="text-sm font-medium text-muted-foreground mb-2">Credenciales de prueba:</p>
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>
@@ -125,7 +138,7 @@ export function LoginForm() {
                   <strong>Usuario:</strong> user@example.com / user123
                 </p>
               </div>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
       </div>
