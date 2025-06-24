@@ -7,7 +7,7 @@ import type {
 } from "@/lib/report-types"
 
 // URL base de la API (en producción, esto vendría de variables de entorno)
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.example.com";
+const API_URL = process.env.NEXT_PUBLIC_ENV === "LOCAL" ? process.env.NEXT_PUBLIC_API_URL_LOCAL  : process.env.NEXT_PUBLIC_API_URL
 const username = process.env.NEXT_PUBLIC_USERNAME || "admin@example.com";
 const password = process.env.NEXT_PUBLIC_PASSWORD || "";
 

@@ -1,7 +1,7 @@
 import type { LoginCredentials, AuthResponse, User } from "@/lib/auth-types"
 import { indexedDBManager } from "@/lib/indexeddb"
 import { getPermissions } from "@/lib/utils";
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const API_URL = process.env.NEXT_PUBLIC_ENV === "LOCAL" ? process.env.NEXT_PUBLIC_API_URL_LOCAL  : process.env.NEXT_PUBLIC_API_URL
 
 
 export async function getToken(username: string, password: string): Promise<string> {
