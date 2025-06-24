@@ -31,17 +31,17 @@ export function ComboboxForm({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between" id={id}>
-          {value ? selectedOption?.label : placeholder}
+          {selectedOption?.label ?? placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-full p-0 z-50" 
+        className="w-full p-0 z-50"
         side="bottom"
         align="start"
         sideOffset={4}
         avoidCollisions={false} // Desactiva el comportamiento automático de colisión
-        >
+      >
         <Command>
           <CommandInput placeholder={`Buscar ${placeholder.toLowerCase()}`} />
           <CommandList>
@@ -51,8 +51,8 @@ export function ComboboxForm({
                 <CommandItem
                   key={option.value}
                   value={option.label}
-                  onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue)
+                  onSelect={() => {
+                    onChange(option.value) // ✅ guarda el ID, no el label
                     setOpen(false)
                   }}
                 >
