@@ -35,7 +35,7 @@ export async function getUsers(): Promise<UserData[]> {
 export async function createUser(userData: CreateUserData): Promise<UserData> {
   try {
     let token = await getToken(username, password);
-    const response = await fetch(`${API_URL}/users`, {
+    const response = await fetch(`${API_URL}/users/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
