@@ -119,12 +119,12 @@ export function LoginForm() {
                 )}
               </Button>
               {/* Link al registro */}
-              <div className="text-center text-sm">
+              {/* <div className="text-center text-sm">
                 <span className="text-muted-foreground">¿No tienes una cuenta? </span>
                 <Link href="/registro" className="text-primary hover:underline font-medium">
                   Crear Cuenta
                 </Link>
-              </div>
+              </div> */}
             </form>
 
             {/* Credenciales de prueba */}

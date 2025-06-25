@@ -13,14 +13,12 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ComboboxForm } from "@/components/combobox-form"
-import { ImageUpload } from "@/components/image-upload"
 import { useToast } from "@/hooks/use-toast"
 
 import { createProduct, getNextSku, uploadImage } from "@/services/product-service";
 import { CategoryTreeSelector } from "@/components/category-tree-selector"
 import type { Category, CreateProductWoocommerce, WooImages } from "@/lib/types";
-import { getTreeCategories } from "@/services/category-service"
-import { createSlug, createTag, dataUrlToFile, homologateCategory, homologateImages } from "@/lib/utils"
+import { createSlug, createTag, dataUrlToFile, homologateCategory } from "@/lib/utils"
 import { useCategories } from "@/hooks/useCategories"
 import { IMAGE_PRESETS } from "@/lib/image-utils"
 import type { ImageProcessingOptions } from "@/lib/image-utils"
@@ -28,25 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { indexedDBManager } from "@/lib/indexeddb"
 import { LoadingOverlay } from "@/components/ui/loading-overlay"
 import { useLoading } from "@/hooks/use-loading"
-import CameraUploader from "./camera-preview"
 import ImagePickerModal from "./ImagePickerModal"
-
-// Datos de ejemplo para los selects
-const vehiculos = [
-  { label: "Toyota Corolla 2020", value: "toyota-corolla-2020" },
-  { label: "Honda Civic 2019", value: "honda-civic-2019" },
-  { label: "Ford Mustang 2021", value: "ford-mustang-2021" },
-  { label: "Chevrolet Camaro 2018", value: "chevrolet-camaro-2018" },
-  { label: "Nissan Sentra 2022", value: "nissan-sentra-2022" },
-]
-
-const categoriasPorModelo = [
-  { label: "Sedán", value: "sedan" },
-  { label: "SUV", value: "suv" },
-  { label: "Pickup", value: "pickup" },
-  { label: "Hatchback", value: "hatchback" },
-  { label: "Deportivo", value: "deportivo" },
-]
 
 export function ProductForm() {
   const router = useRouter()

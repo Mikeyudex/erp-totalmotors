@@ -5,9 +5,16 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from "@/hooks/use-auth"
-import { SessionMonitor } from "@/components/auth/session-monitor"
 
 const inter = Inter({ subsets: ["latin"] })
+
+export const metadata = {
+  title: "Erp Totalmotors",
+  description: "Erp Totalmotors",
+  icons: {
+    icon: "https://www.totalmotors.cl/wp-content/uploads/2022/08/cropped-Circulo1-180x180.png",
+  },
+}
 
 // Envolver el contenido con AuthProvider:
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -18,10 +25,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AuthProvider>
             {children}
             <Toaster />
-             {/* <SessionMonitor showInDevelopment={false} /> */}
+            {/* <SessionMonitor showInDevelopment={false} /> */}
           </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
   )
 }
+

@@ -7,11 +7,12 @@ import { useAuth } from "@/hooks/use-auth"
 import { Loader2 } from "lucide-react"
 
 interface AuthWrapperProps {
-  children: React.ReactNode
+  children: React.ReactNode,
+  role?: string
 }
 
 export function AuthWrapper({ children }: AuthWrapperProps) {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, user } = useAuth()
   const pathname = usePathname()
 
   // Rutas que no requieren el layout del dashboard
@@ -26,7 +27,7 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Verificando autenticación...</p>
         </div>
-      </div>
+      </div> 
     )
   }
 
@@ -36,5 +37,5 @@ export function AuthWrapper({ children }: AuthWrapperProps) {
   }
 
   // Si está autenticado y no es ruta pública, mostrar con layout del dashboard
-  return <DashboardLayout>{children}</DashboardLayout>
+  return <DashboardLayout role={user?.role}>{children}</DashboardLayout>
 }

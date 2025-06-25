@@ -1,10 +1,10 @@
 "use client"
 
 import type React from "react"
-
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Box, Home, Package, Settings, Truck, Users, Tag, BarChart3 } from "lucide-react"
+import { Box, Home, Package, Settings, Truck, Users, Tag, BarChart3, Menu, Bell, Search, Package2, ShoppingCart } from "lucide-react"
 
 import {
   Sidebar,
@@ -23,7 +23,7 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { UserMenu } from "@/components/auth/user-menu"
 
 
-export function DashboardLayout({ children }: { children: React.ReactNode }) {
+export function DashboardLayout({ children, role }: { children: React.ReactNode, role?: string } ) {
   const pathname = usePathname()
 
   return (
@@ -54,22 +54,31 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            {/* <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={pathname.startsWith("/categorias")} tooltip="Categorías">
-                <Link href="/categorias">
-                  <Tag className="h-4 w-4" />
-                  <span>Categorías</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem> */}
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={pathname.startsWith("/reportes")} tooltip="Reportes">
-                <Link href="/reportes">
-                  <BarChart3 className="h-4 w-4" />
-                  <span>Reportes</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+
+            {
+              role === "admin" && (
+                <>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={pathname.startsWith("/usuarios")} tooltip="Usuarios">
+                      <Link href="/usuarios">
+                        <Users className="h-4 w-4" />
+                        <span>Usuarios</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={pathname.startsWith("/reportes")} tooltip="Reportes">
+                      <Link href="/reportes">
+                        <BarChart3 className="h-4 w-4" />
+                        <span>Reportes</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </>
+              )
+            }
+
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter className="p-4">

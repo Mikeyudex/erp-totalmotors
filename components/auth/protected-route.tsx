@@ -12,9 +12,10 @@ interface ProtectedRouteProps {
   children: React.ReactNode
   requiredPermissions?: string[]
   fallbackPath?: string
+  role?: string
 }
 
-export function ProtectedRoute({ children, requiredPermissions = [], fallbackPath = "/login" }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, requiredPermissions = [], fallbackPath = "/login", role = "" }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, user } = useAuth()
   const router = useRouter()
 
@@ -27,8 +28,11 @@ export function ProtectedRoute({ children, requiredPermissions = [], fallbackPat
   // Verificar permisos si están especificados
   useEffect(() => {
     if (isAuthenticated && user && requiredPermissions.length > 0) {
-      const hasRequiredPermissions = requiredPermissions.every((permission) => user.permissions.includes(permission))
-
+      if(!role){
+        return;
+      }
+      //const hasRequiredPermissions = requiredPermissions.every((permission) => user.permissions.includes(permission))
+      const hasRequiredPermissions = role === user.role
       if (!hasRequiredPermissions) {
         router.push("/unauthorized")
       }

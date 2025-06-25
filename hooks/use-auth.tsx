@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import type { AuthState, LoginCredentials } from "@/lib/auth-types"
+import type { AuthState, LoginCredentials, User } from "@/lib/auth-types"
 import { login as loginService, logout as logoutService, getCurrentUser, isTokenValid } from "@/services/auth-service"
 import { tokenValidator } from "@/lib/token-validator"
 import { StorageCleaner } from "@/lib/storage-cleaner"
@@ -13,6 +13,7 @@ interface AuthContextType extends AuthState {
   logout: (showToast?: boolean) => Promise<void>
   forceLogout: (reason?: string) => Promise<void>
   checkAuth: () => Promise<void>
+  user: User | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -240,6 +241,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         forceLogout,
         checkAuth,
+        user: authState.user || null,
       }}
     >
       {children}
