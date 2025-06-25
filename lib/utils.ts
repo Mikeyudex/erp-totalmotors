@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { Category, CategoryWoo, Tags, WooImages } from "./types";
+import { Category, CategoryWoo, DroppedFile, Tags, WooImages } from "./types";
 import { User } from "./auth-types";
 
 export function cn(...inputs: ClassValue[]) {
@@ -99,3 +99,9 @@ export function dataUrlToFile(dataUrl: string, filename: string): File {
 
   return new File([u8arr], filename, { type: mime });
 }
+
+export const createDroppedFiles = (files: File[]): DroppedFile[] =>
+  files.map((file) => ({
+    file,
+    preview: URL.createObjectURL(file),
+  }))

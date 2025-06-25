@@ -203,4 +203,4 @@ export async function uploadImage(file: File) {
         console.error(`Error al eliminar el producto con ID ${id}:`, error)
         throw error
     }
-} */
+}  */

@@ -113,3 +113,8 @@ export interface WooImages {
     id?: number
     src: string
 }
+
+export type DroppedFile = {
+  file: File
+  preview: string
+}

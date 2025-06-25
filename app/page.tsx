@@ -22,7 +22,7 @@ export default function DashboardPage() {
             <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Dashboard</h1>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium">Productos</CardTitle>
@@ -56,11 +56,11 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </div>
-
+ */}
           <Card>
             <CardHeader>
               <CardTitle>Acciones rápidas</CardTitle>
-              <CardDescription>Gestiona tus productos y categorías</CardDescription>
+              <CardDescription>Gestiona tus productos</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge"
 
-import { getProducts, deleteProduct } from "@/services/product-service"
+import { getProducts } from "@/services/product-service"
 import type { Product } from "@/lib/types"
 import { numberFormatPrice } from "@/lib/utils"
 
@@ -105,7 +105,7 @@ export function ProductsTable() {
   }, [currentPage, pageSize, debouncedSearchTerm, toast])
 
   // Función para manejar la eliminación de un producto
-  const handleDeleteProduct = async (id: string) => {
+/*   const handleDeleteProduct = async (id: string) => {
     try {
       await deleteProduct(id)
 
@@ -140,7 +140,7 @@ export function ProductsTable() {
         variant: "destructive",
       })
     }
-  }
+  } */
 
   // Calcular el rango de productos mostrados
   const startItem = (currentPage - 1) * pageSize + 1
@@ -238,15 +238,15 @@ export function ProductsTable() {
                         <TableCell>{producto.modelo}</TableCell>
                         <TableCell className="text-right">{numberFormatPrice(producto.precio)}</TableCell>
                         <TableCell className="text-right">{producto.stock}</TableCell>
-                        <TableCell>
-                          <DropdownMenu>
+                   {/*      <TableCell> */}
+                       {/*    <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon">
                                 <MoreHorizontal className="h-4 w-4" />
                                 <span className="sr-only">Abrir menú</span>
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                           <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem>
@@ -260,9 +260,9 @@ export function ProductsTable() {
                                 <Trash className="mr-2 h-4 w-4" />
                                 Eliminar
                               </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
+                            </DropdownMenuContent> 
+                          </DropdownMenu> */}
+                        {/* </TableCell> */}
                       </TableRow>
                     ))
                   ) : (
@@ -300,7 +300,7 @@ export function ProductsTable() {
                           <div className="text-sm text-muted-foreground">Stock: {producto.stock}</div>
                         </div>
                       </div>
-                      <DropdownMenu>
+                      {/* <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
                             <MoreHorizontal className="h-4 w-4" />
@@ -322,7 +322,7 @@ export function ProductsTable() {
                             Eliminar
                           </DropdownMenuItem>
                         </DropdownMenuContent>
-                      </DropdownMenu>
+                      </DropdownMenu> */}
                     </div>
                   </CardContent>
                 </Card>

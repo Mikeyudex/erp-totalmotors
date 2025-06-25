@@ -27,6 +27,7 @@ import { indexedDBManager } from "@/lib/indexeddb"
 import { LoadingOverlay } from "@/components/ui/loading-overlay"
 import { useLoading } from "@/hooks/use-loading"
 import ImagePickerModal from "./ImagePickerModal"
+import { DroppedFile } from "@/lib/types"
 
 export function ProductForm() {
   const router = useRouter()
@@ -58,6 +59,7 @@ export function ProductForm() {
   const [customImageOptions, setCustomImageOptions] = useState<Partial<ImageProcessingOptions>>({})
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [droppedFiles, setDroppedFiles] = useState<DroppedFile[]>([])
 
   // Estados para controlar las secciones colapsables
   const [isBasicInfoOpen, setIsBasicInfoOpen] = useState(true)
@@ -465,14 +467,6 @@ export function ProductForm() {
             </Card>
           </Collapsible>
 
-          {/* <CameraUploader
-                          onImageCapture={handleImageUpload}
-                          preset={imagePreset}
-                          customOptions={customImageOptions}
-                          showCompressionInfo={true}
-                        /> */}
-
-          {/* Botones de acción */}
           <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6">
             <Button type="button" variant="outline" onClick={() => router.back()} className="w-full sm:w-auto">
               Cancelar
@@ -495,6 +489,8 @@ export function ProductForm() {
             preset={imagePreset}
             customOptions={customImageOptions}
             showCompressionInfo={true}
+            droppedFiles={droppedFiles}
+            setDroppedFiles={setDroppedFiles}
           />
         </form>
       </div>

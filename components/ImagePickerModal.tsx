@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Camera, ImagePlus, RefreshCcw } from "lucide-react"
 import { processImage, IMAGE_PRESETS } from "@/lib/image-utils"
+import { DroppedFile } from "@/lib/types"
+import { createDroppedFiles } from "@/lib/utils"
 
 interface Props {
   open: boolean
@@ -21,6 +23,8 @@ interface Props {
     format?: "image/jpeg" | "image/png" | "image/webp"
   }
   showCompressionInfo?: boolean
+  droppedFiles: DroppedFile[]
+  setDroppedFiles: any
 }
 
 export default function ImagePickerModal({
@@ -30,11 +34,14 @@ export default function ImagePickerModal({
   preset,
   customOptions,
   showCompressionInfo = false,
+  droppedFiles,
+  setDroppedFiles
 }: Props) {
   const [tab, setTab] = useState("upload")
   const [stream, setStream] = useState<MediaStream | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const [facingMode, setFacingMode] = useState<"user" | "environment">("environment")
+  const [isUploadingDropzone, setIsUploadingDropzone] = useState(false)
 
   const startCamera = async () => {
     try {
@@ -102,8 +109,14 @@ export default function ImagePickerModal({
     setOpen(false)
   }
 
+  const handleCloseDialog = () => {
+    setOpen(false)
+    setDroppedFiles([])
+    droppedFiles.forEach(({ preview }) => URL.revokeObjectURL(preview))
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleCloseDialog}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Agregar Imagen</DialogTitle>
@@ -120,13 +133,67 @@ export default function ImagePickerModal({
           </TabsList>
 
           <TabsContent value="upload">
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleUpload}
-              className="w-full"
-            />
+            <div
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault()
+                const files = Array.from(e.dataTransfer.files)
+                  .filter(file => file.type.startsWith("image/"))
+                  .slice(0, 4 - droppedFiles.length)
+                setDroppedFiles((prev: any) => [...prev, ...createDroppedFiles(files)])
+              }}
+              className="w-full min-h-32 flex flex-col items-center justify-center border-2 border-dashed border-muted rounded-md mb-4 hover:bg-muted/30 transition-colors cursor-pointer text-sm text-muted-foreground p-4"
+            >
+              {droppedFiles.length === 0
+                ? "Arrastra tus imágenes aquí"
+                : (
+                  <ul className="text-left w-full text-sm space-y-2">
+                    {droppedFiles.map(({ file, preview }, idx) => (
+                      <li key={idx} className="flex items-center gap-2">
+                        <img src={preview} alt={file.name} className="w-10 h-10 object-cover rounded-sm border" />
+                        <span className="truncate">{file.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => {
+                  const files = e.target.files
+                  if (!files) return
+                  setDroppedFiles((prev: any) => [...prev, ...createDroppedFiles(Array.from(files).slice(0, 4 - prev.length))])
+                }}
+                className="w-full"
+              />
+              <Button
+                variant="default"
+                onClick={async () => {
+                  if (droppedFiles.length === 0) return
+                  setIsUploadingDropzone(true)
+                  const presetOptions = IMAGE_PRESETS[preset]
+
+                  for (const { file } of droppedFiles) {
+                    const result = await processImage(file, {
+                      ...presetOptions,
+                      ...customOptions,
+                    })
+                    onImageCapture(result.dataUrl)
+                  }
+
+                  setIsUploadingDropzone(false)
+                  setDroppedFiles([])
+                  setOpen(false)
+                }}
+                disabled={isUploadingDropzone}
+              >
+                {isUploadingDropzone ? "Subiendo..." : "Subir"}
+              </Button>
+            </div>
           </TabsContent>
 
           <TabsContent value="camera">
@@ -153,6 +220,6 @@ export default function ImagePickerModal({
           </TabsContent>
         </Tabs>
       </DialogContent>
-    </Dialog>
+    </Dialog >
   )
 }
