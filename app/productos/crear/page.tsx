@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function CrearProductoPage() {
   return (
     <AuthWrapper>
-      <ProtectedRoute requiredPermissions={["write"]}>
+      <ProtectedRoute requiredPermissions={["read"]}>
         <div className="flex-1 space-y-4 p-4 md:p-8">
           <div className="space-y-2">
             <h1 className="text-2xl font-bold tracking-tight">Crear Nuevo Producto</h1>
