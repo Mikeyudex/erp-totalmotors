@@ -145,11 +145,7 @@ export function ProductCreationReport() {
         })
       }
 
-      const csvContent = await exportProductCreationReportCSV({
-        userId: filters.userId,
-        startDate: filters.startDate,
-        endDate: filters.endDate,
-      })
+      const csvContent = await exportProductCreationReportCSV(reports)
 
       // Crear y descargar archivo
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })

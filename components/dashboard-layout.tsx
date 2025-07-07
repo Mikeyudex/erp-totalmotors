@@ -23,7 +23,7 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { UserMenu } from "@/components/auth/user-menu"
 
 
-export function DashboardLayout({ children, role }: { children: React.ReactNode, role?: string } ) {
+export function DashboardLayout({ children, role }: { children: React.ReactNode, role?: string }) {
   const pathname = usePathname()
 
   return (
@@ -72,6 +72,15 @@ export function DashboardLayout({ children, role }: { children: React.ReactNode,
                       <Link href="/reportes">
                         <BarChart3 className="h-4 w-4" />
                         <span>Reportes</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={pathname.startsWith("/sku")} tooltip="SKU Manager">
+                      <Link href="/sku">
+                        <Settings className="h-4 w-4" />
+                        <span>SKU Manager</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
