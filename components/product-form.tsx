@@ -43,7 +43,7 @@ export function ProductForm() {
   // Estados del formulario
   const [images, setImages] = useState<WooImages[]>([])
   const [vehiculo, setVehiculo] = useState("")
-  const [nombreVehiculo, setNombreVehiculo] = useState<any>("")
+  const [nombreVehiculo, setNombreVehiculo] = useState<string>("")
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([])
   const { availableCategories, isLoadingCategories, modelCategories } = useCategories();
   const [productName, setProductName] = useState("");
@@ -78,6 +78,7 @@ export function ProductForm() {
     try {
       let authData = await indexedDBManager.getAuthData();
       let userId = authData?.user.id;
+      let brand = nombreVehiculo.length > 0 ? nombreVehiculo.split(" ")[0] : nombreVehiculo;
       const productData: CreateProductWoocommerce = {
         sku: productSku.toString(),
         name: `${productName.toUpperCase()} ${nombreVehiculo}`,
@@ -93,6 +94,14 @@ export function ProductForm() {
           {
             key: "_created_by_user_id",
             value: userId
+          },
+          {
+            key: "BRAND",
+            value: brand
+          },
+          {
+            key: "PART_NUMBER",
+            value: productNumeroParte
           }
         ],
         user_id: userId,
@@ -182,7 +191,7 @@ export function ProductForm() {
   const handleChangeVehiculo = (value: string) => {
     setVehiculo(value)
     let vehiculo = modelCategories.find(category => String(category.id) === value)?.name
-    setNombreVehiculo(vehiculo)
+    setNombreVehiculo(vehiculo!)
   }
 
   const currentPreset = IMAGE_PRESETS[imagePreset]
@@ -422,24 +431,45 @@ export function ProductForm() {
 
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                       {images.map((image, index) => (
-                        <Card key={index} className="relative overflow-hidden">
-                          <CardContent className="p-0">
-                            <img
-                              src={image.src || "/placeholder.svg"}
-                              alt={`Producto ${index + 1}`}
-                              className="w-full h-32 object-cover"
-                            />
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="absolute top-1 right-1 h-6 w-6"
-                              onClick={() => handleRemoveImage(index)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </CardContent>
-                        </Card>
+                        <div
+                          key={index}
+                          className="relative overflow-hidden cursor-move"
+                          draggable
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData("text/plain", index.toString())
+                          }}
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={(e) => {
+                            e.preventDefault()
+                            const draggedIndex = Number(e.dataTransfer.getData("text/plain"))
+                            const targetIndex = index
+                            if (draggedIndex === targetIndex) return
+
+                            const updated = [...images]
+                            const [dragged] = updated.splice(draggedIndex, 1)
+                            updated.splice(targetIndex, 0, dragged)
+                            setImages(updated)
+                          }}
+                        >
+                          <Card>
+                            <CardContent className="p-0">
+                              <img
+                                src={image.src || "/placeholder.svg"}
+                                alt={`Producto ${index + 1}`}
+                                className="w-full h-32 object-cover"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute top-1 right-1 h-6 w-6"
+                                onClick={() => handleRemoveImage(index)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        </div>
                       ))}
 
                       {images.length < 4 && (
@@ -461,6 +491,8 @@ export function ProductForm() {
                         </div>
                       )}
                     </div>
+
+
                   </div>
                 </CardContent>
               </CollapsibleContent>

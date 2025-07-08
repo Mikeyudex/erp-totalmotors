@@ -149,7 +149,26 @@ export default function ImagePickerModal({
                 : (
                   <ul className="text-left w-full text-sm space-y-2">
                     {droppedFiles.map(({ file, preview }, idx) => (
-                      <li key={idx} className="flex items-center gap-2">
+                      <li
+                        key={idx}
+                        className="flex items-center gap-2 cursor-move"
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData("text/plain", idx.toString())
+                        }}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault()
+                          const draggedIndex = Number(e.dataTransfer.getData("text/plain"))
+                          const targetIndex = idx
+                          if (draggedIndex === targetIndex) return
+
+                          const updatedFiles = [...droppedFiles]
+                          const [draggedItem] = updatedFiles.splice(draggedIndex, 1)
+                          updatedFiles.splice(targetIndex, 0, draggedItem)
+                          setDroppedFiles(updatedFiles)
+                        }}
+                      >
                         <img src={preview} alt={file.name} className="w-10 h-10 object-cover rounded-sm border" />
                         <span className="truncate">{file.name}</span>
                       </li>
