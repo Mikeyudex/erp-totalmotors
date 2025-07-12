@@ -2,7 +2,7 @@ import type { Category, CreateProductWoocommerce, PaginatedResponse, PaginationP
 import { getToken } from "./auth-service";
 
 // URL base de la API (en producción, esto vendría de variables de entorno)
-const API_URL = process.env.NEXT_PUBLIC_ENV === "LOCAL" ? process.env.NEXT_PUBLIC_API_URL_LOCAL  : process.env.NEXT_PUBLIC_API_URL
+export const API_URL = process.env.NEXT_PUBLIC_ENV === "LOCAL" ? process.env.NEXT_PUBLIC_API_URL_LOCAL : process.env.NEXT_PUBLIC_API_URL
 const username = process.env.NEXT_PUBLIC_USERNAME || "admin@example.com";
 const password = process.env.NEXT_PUBLIC_PASSWORD || "";
 
@@ -157,6 +157,34 @@ export async function uploadImage(file: File) {
         return await res.json();
     } catch (error) {
         console.error("Error subiendo imagen:", error);
+        throw error;
+    }
+}
+
+export async function removeBackgroundImage(file: File, type_process: string): Promise<{ id: string, url: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+        let token = await getToken(username, password);
+        const res = await fetch(`${API_URL}/media/remove_background/${type_process}`, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.detail || "Error al procesar el background");
+        }
+        const data = await res.json();
+        return {
+            id: data.id,
+            url: data.url
+        };
+    } catch (error) {
+        console.error("Error procesando el background:", error);
         throw error;
     }
 }

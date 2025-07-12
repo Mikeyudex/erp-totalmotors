@@ -15,7 +15,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ComboboxForm } from "@/components/combobox-form"
 import { useToast } from "@/hooks/use-toast"
 
-import { createProduct, getNextSku, uploadImage } from "@/services/product-service";
+import { API_URL, createProduct, getNextSku, removeBackgroundImage, uploadImage } from "@/services/product-service";
 import { CategoryTreeSelector } from "@/components/category-tree-selector"
 import type { Category, CreateProductWoocommerce, WooImages } from "@/lib/types";
 import { createSlug, createTag, dataUrlToFile, homologateCategory } from "@/lib/utils"
@@ -60,6 +60,8 @@ export function ProductForm() {
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [droppedFiles, setDroppedFiles] = useState<DroppedFile[]>([])
+  const [enableWhiteBackground, setEnableWhiteBackground] = useState(true);
+  const [typeProcessRemove, setTypeProcessRemove] = useState<string>("green");
 
   // Estados para controlar las secciones colapsables
   const [isBasicInfoOpen, setIsBasicInfoOpen] = useState(true)
@@ -166,19 +168,46 @@ export function ProductForm() {
 
   const handleImageUpload = async (newImage: string) => {
     if (images.length >= 4) return;
+    setIsUploading(true)
+    const file = dataUrlToFile(newImage, `imagen-${Date.now()}.jpg`);
+    if (!enableWhiteBackground) {
+      try {
+        const uploaded = await uploadImage(file); // llamada al servicio que sube la imagen
+        setImages((prev) => [...prev, { id: uploaded?.id, src: uploaded?.url }]);
+      } catch (error) {
+        toast({
+          title: "Error subiendo imagen",
+          description: (error as Error).message,
+          variant: "destructive",
+        });
+      } finally {
+        setIsUploading(false);
+      }
+    } else {
+      try {
+        await handleUploadImageByRemoveBackground(file, typeProcessRemove);
+      } catch (error) {
+        toast({
+          title: "Error al remover el fondo",
+          description: (error as Error).message,
+          variant: "destructive",
+        });
+      } finally {
+        setIsUploading(false);
+      }
+    }
+  }
+
+  const handleUploadImageByRemoveBackground = async (file: File, type_process: string) => {
     try {
-      setIsUploading(true)
-      const file = dataUrlToFile(newImage, `imagen-${Date.now()}.jpg`);
-      const uploaded = await uploadImage(file); // llamada al servicio que sube la imagen
-      setImages((prev) => [...prev, { id: uploaded?.id, src: uploaded?.url }]);
+      const result = await removeBackgroundImage(file, type_process);
+      let url_remove_background = `${API_URL}${result?.url}`;
+      const imageBlob = await fetch(url_remove_background).then(res => res.blob());
+      const processedFile = new File([imageBlob], file.name, { type: imageBlob.type });
+      const uploaded = await uploadImage(processedFile);
+      setImages((prev) => [...prev, { id: uploaded?.id, src: url_remove_background }]);
     } catch (error) {
-      toast({
-        title: "Error subiendo imagen",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
+      throw new Error(`Error al procesar el fondo de la imagen: ${(error as Error).message}`);
     }
   }
 
@@ -418,6 +447,35 @@ export function ProductForm() {
                                   <p>Formato: {currentPreset.format.split("/")[1].toUpperCase()}</p>
                                 </div>
                               </div>
+
+                              <div className="space-y-2">
+
+                                <div className="text-sm text-muted-foreground space-y-1">
+                                  <Label>Activar procesamiento de fondo blanco</Label>
+                                  <input className="ml-2 cursor-pointer" type="checkbox" name="enableWhiteBackground" checked={enableWhiteBackground} onChange={(e) => setEnableWhiteBackground(e.target.checked)} />
+                                </div>
+                                {
+                                  enableWhiteBackground && (
+                                    <div className="space-y-2">
+                                      <Label htmlFor="typeProcessRemove">Tipo de procesamiento de fondo blanco</Label>
+                                      <Select
+                                        value={typeProcessRemove}
+                                        onValueChange={(value) => setTypeProcessRemove(value)}
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="green">Green</SelectItem>
+                                          <SelectItem value="blue">Blue</SelectItem>
+                                          <SelectItem value="auto">Auto</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  )
+                                }
+                              </div>
+
                             </div>
                           </div>
                         </CardContent>
