@@ -98,12 +98,8 @@ export function ProductForm() {
             value: userId
           },
           {
-            key: "BRAND",
-            value: brand
-          },
-          {
-            key: "PART_NUMBER",
-            value: productNumeroParte
+            key: "_wm_attribute",
+            value: `BRAND||value_name::${brand},PART_NUMBER||value_name::${productNumeroParte}`
           }
         ],
         user_id: userId,
