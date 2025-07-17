@@ -61,7 +61,6 @@ export function ProductForm() {
   const [isUploading, setIsUploading] = useState(false)
   const [droppedFiles, setDroppedFiles] = useState<DroppedFile[]>([])
   const [enableWhiteBackground, setEnableWhiteBackground] = useState(true);
-  const [typeProcessRemove, setTypeProcessRemove] = useState<string>("green");
 
   // Estados para controlar las secciones colapsables
   const [isBasicInfoOpen, setIsBasicInfoOpen] = useState(true)
@@ -181,7 +180,7 @@ export function ProductForm() {
       }
     } else {
       try {
-        await handleUploadImageByRemoveBackground(file, typeProcessRemove);
+        await handleUploadImageByRemoveBackground(file);
       } catch (error) {
         toast({
           title: "Error al remover el fondo",
@@ -194,9 +193,9 @@ export function ProductForm() {
     }
   }
 
-  const handleUploadImageByRemoveBackground = async (file: File, type_process: string) => {
+  const handleUploadImageByRemoveBackground = async (file: File) => {
     try {
-      const result = await removeBackgroundImage(file, type_process);
+      const result = await removeBackgroundImage(file);
       let url_remove_background = `${API_URL}${result?.url}`;
       const imageBlob = await fetch(url_remove_background).then(res => res.blob());
       const processedFile = new File([imageBlob], file.name, { type: imageBlob.type });
@@ -450,26 +449,7 @@ export function ProductForm() {
                                   <Label>Activar procesamiento de fondo blanco</Label>
                                   <input className="ml-2 cursor-pointer" type="checkbox" name="enableWhiteBackground" checked={enableWhiteBackground} onChange={(e) => setEnableWhiteBackground(e.target.checked)} />
                                 </div>
-                                {
-                                  enableWhiteBackground && (
-                                    <div className="space-y-2">
-                                      <Label htmlFor="typeProcessRemove">Tipo de procesamiento de fondo blanco</Label>
-                                      <Select
-                                        value={typeProcessRemove}
-                                        onValueChange={(value) => setTypeProcessRemove(value)}
-                                      >
-                                        <SelectTrigger>
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="green">Green</SelectItem>
-                                          <SelectItem value="blue">Blue</SelectItem>
-                                          <SelectItem value="auto">Auto</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                  )
-                                }
+                                
                               </div>
 
                             </div>

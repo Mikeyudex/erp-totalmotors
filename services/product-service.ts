@@ -161,13 +161,13 @@ export async function uploadImage(file: File) {
     }
 }
 
-export async function removeBackgroundImage(file: File, type_process: string): Promise<{ id: string, url: string }> {
+export async function removeBackgroundImage(file: File): Promise<{ id: string, url: string }> {
     const formData = new FormData();
     formData.append("file", file);
 
     try {
         let token = await getToken(username, password);
-        const res = await fetch(`${API_URL}/media/remove_background/${type_process}`, {
+        const res = await fetch(`${API_URL}/media/remove_background`, {
             method: "POST",
             body: formData,
             headers: {
